@@ -74,7 +74,8 @@ If you have existing programming experience then I recommend reading this guide:
 
 A great guide on how to create dynamic and highly reproducible research:
 
-- Gandrud, C. 2015. Reproducible Research with R and RStudio. 2nd Edition. Chapman & Hall/CRC Press, Oxford.
+- Gandrud, C. 2015. [Reproducible Research with R and RStudio](https://github.com/christophergandrud/Rep-Res-Book). 2nd Edition. Chapman & Hall/CRC Press, Oxford.
+
 Finally, the core background reading for the course is:
 
 - Wickham, H. and G. Grolemund. 2017. R for Data Science: Import, Tidy, Transform, Visualize, and Model Data. O'Reilly.
