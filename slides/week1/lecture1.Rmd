@@ -1,0 +1,276 @@
+---
+title: "Data Management With R: Lecture 1"
+author: "Matthias Haber"
+date: "4 September 2017"
+output:
+  beamer_presentation:
+    theme: "metropolis"
+    colortheme: "default"
+    fonttheme: "default"
+    fig_caption: false
+  ioslides_presentation:
+  slidy_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## About myself
+
+
+
+
+**Found errors?**
+
+- <a href="https://github.com/mhaber/HertieDataScience/issues"><i class="fa fa-exclamation-circle"></i> https://github.com/mhaber/HertieDataScience/issues</a>
+
+
+## Plan for Today
+
+1. **Introductions**
+
+2. **Data Science Examples**
+
+3. **What is Data Science?**
+
+4. **Why Study Data Science?**
+
+5. **GitHub**
+
+6. **Organization**
+
+# Introductions
+
+## About myself
+- Postdoc at Hertie since May 2015 (Governance Report)
+- PhD in PolSci (Uni Mannheim)
+- Research on parties, legislative politics, electoral behavior
+- Working with R since 2011 (switched from STATA)
+
+**Contact**:
+
+- <a href="mailto:haber@hertie-schoolorg"><i class="fa fa-envelope"></i> haber@hertie-schoolorg</a>
+
+
+**Office Hours**:
+
+- Room: 3.60 (until 15 September)
+- By appointment
+
+## About yourself
+- Who are you?
+- Why did you take this class?
+- What are your expectations?
+- How much experience do you have with R?
+
+# Data Science Examples
+
+## Data Science Example 1: Politics
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/electoralCollege.pdf")
+```  
+
+- Nate Silver ([fivethirtyeight.com](http://fivethirtyeight.com/)) predicted the election perfectly
+- How?
+\newline
+
+\footnotetext{Example adapted from Bill Howe, University of Washington}
+
+## Data Science Example 1: Politics
+
+> "The bar set by the competition was invitingly low. Someone could look like a genius simply by doing some fairly basic research into what really has
+predictive power in a political campaign."
+Nate Silver, Nov. 10, 1012
+
+- Predictive power in this case was the aggregated state polls 
+
+\alert{Simple methods plus enough good data wins!}
+
+## Related: Obama's data driven campaign
+
+> "In the 21st century, the candidate with the best data, merged with the best messages dictated by that data, wins."
+Andrew Rasiej, Personal Democracy Forum
+
+> "...the biggest win came from good old SQL on a Vertica data warehouse and from providing access to data to dozens of analytics staffers who could follow their own curiosity and distill and analyze data as the needed."
+Dan Woods, Jan 13 2013, CITO Research
+
+## Data Science Example 2: Digital Humanities
+
+Acerbi et al. 2013. **[The Expression of Emotions in 20th Century Books.](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0059030)** PLoS ONE 8(3).
+
+_Have the words that we choose to use in our collective literature changed over time and  does that tell us something about culture?_
+
+1. Convert all the digitized books in the 20th century into n-grams (http://books.google.com/ngrams/)
+
+2. Label each 1-gram with a mood score (https://wordnet.princeton.edu/)
+
+3. Count the occurences of each mood word
+$$M_\gamma = \frac{1}{n}\sum_{i=1}^{n}\frac{C_i}{C_{the}}; M_{Z \gamma}=\frac{M_\gamma - \mu_M}{\sigma_M}$$
+- why normalize by the total occurences of the word _the_?
+
+    + _the_ is a better indicator of prose than the total number of words
+
+## The Expression of Emotions: Result 1
+```{r, out.width = "220px", echo = F, fig.align='center'}
+knitr::include_graphics("img/emotions.png")
+``` 
+
+## The Expression of Emotions: Result 2
+```{r, out.width = "220px", echo = F, fig.align='center'}
+knitr::include_graphics("img/emotions2.png")
+``` 
+
+## The Expression of Emotions: References
+
+2. Michel J-P, Shen YK, Aiden AP, Veres A, Gray MK, et al. (2011) **Quantitative analysis of culture using millions of digitized books.** Science 331: 176–182. 
+3. Lieberman E, Michel J-P, Jackson J, Tang T, Nowak MA (2007) **Quantifying the evolutionary dynamics of language.** Nature 449: 713–716. 
+4. Pagel M, Atkinson QD, Meade A (2007) **Frequency of word-use predicts rates of lexical evolution throughout Indo-European history.** Nature 449: 717–720. 
+
+\alert{All science is becoming data science!}
+
+
+## Data Science Example 3: Bibliometrics
+
+- How important is a particular scientific paper, relative to other papers?
+
+```{r, out.width = "200px", echo = F, fig.align='center'}
+knitr::include_graphics("img/pageRank1.png")
+``` 
+
+## Data Science Example 3: Bibliometrics
+
+- How important is a particular scientific paper, relative to other papers? \alert{Count the number of citations!}
+    
+```{r, out.width = "130px", echo = F, fig.align='center'}
+knitr::include_graphics("img/pageRank2.png")
+``` 
+
+## Data Science Example 3: Bibliometrics
+
+- How do we decided now?
+
+```{r, out.width = "200px", echo = F, fig.align='center'}
+knitr::include_graphics("img/pageRank3.png")
+``` 
+
+## Data Science Example 3: Bibliometrics
+
+- How do we decided now? \alert{A paper is important if a lot of other important papers point to it!}
+
+```{r, out.width = "200px", echo = F, fig.align='center'}
+knitr::include_graphics("img/pageRank3.png")
+``` 
+
+## Data Science Example 3: Bibliometrics
+
+\alert{Google's pagerank algorithm}
+
+- Add up all the weights of your neighbors and give them to yourself and then pass on that weight to everybody that you link to. And you keep going with this until you've reached some convergence condition and you end up with the relative
+importance of these pages
+
+## Data Science Example 3: Mapping Change
+
+Rosvall, Martin and Carl T. Bergstrom. 2010.
+**[Mapping Change in Large Networks.](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0008694)** PLoS. 
+
+- mapping change in science by studying citation patterns
+
+```{r, out.width = "300px", echo = F}
+knitr::include_graphics("img/mappingChange.png")
+``` 
+
+\alert{Use data science to uncover the emergence of new fields of science}
+
+## Data Science Example 4: Music
+
+```{r, out.width = "300px", echo = F}
+knitr::include_graphics("img/lastfm.png")
+```
+
+> Since we have a large amount of user tag data available we can easily correlate tags and years and measure "popularity" of a genere by counting the number of artists formed in a specific year."
+Janni Kovacs, Last.FM
+
+## Data Science Example 5: Flu Trends
+
+```{r, out.width = "200px", echo = F, fig.align='center'}
+knitr::include_graphics("img/fluTrends.png")
+```
+
+## Data Science Example 6: Earthquake
+
+- October 22, 2012: Six Italian seismologists sentenced to six years in prison for manslaughter for failing to predict magnitude 6.3 earthquake in April 2009 (later cleared)
+
+```{r, out.width = "200px", echo = F, fig.align='center'}
+knitr::include_graphics("img/earthquake.jpg")
+```
+
+# What is Data Science?
+
+## Data Science Quotes
+
+> "Hot New Gig in Tech" Fortune
+
+> "The next sexy job" Hal Varian, Google's Chief Economist, NYT, 2009
+
+> "Data science, as it's practiced, is a blend of Red-Bull-fueled hacking and espresso-inspired statistics" Mike Driscoll, CEO of metamarkets
+
+## Data Science Venn Diagram (by Drew Conway)
+
+```{r, out.width = "300px", echo = F, fig.align='center'}
+knitr::include_graphics("img/dataScience.jpg")
+```
+
+## What do data scientist do?
+
+
+> "They need to find the nuggest of truth in data and then explain it to the business leaders" Richard Snee, EMC
+
+> "I worry that the Data Scientist role is like the mythical 'webmaster' of the 90s: master of all trades." Aaron Kimball, CTO Zymergen
+
+
+
+## Three types of tasks
+
+1. Preparing to run a model \alert{(Data Munging)}
+
+    + Gathering, cleaning, integrating, restructuring, transforming, loading, filtering, deleting, combining, merging, verifying, extracting, shaping
+    
+2. Running the model \alert{(Statistics)}
+
+3. Communicating the results \alert{(Visualization)}
+
+# Plan for the course
+
+
+
+# Github
+
+## GitHub
+
+Setup Git/GitHub for version control, collaboration, and remotely storing your files.
+
+- Set up (free) GitHub account: <https://github.com/join>.
+
+- Install GitHub application: <https://desktop.github.com/>.
+
+## Statistics software
+
+- Install software:
+
+    + R (version 3.3.2): <http://cran.rstudio.com/>
+    + RStudio (dev build): <http://www.rstudio.org/download/daily/desktop/>
+
+- Make sure that you can install R packages
+
+## Requirements
+
+**Homework Assignments**
+
+**Final research project**
+
+**Participation in class**
+
+- Regular attendance, active participation
+- Ask questions!!!
+
