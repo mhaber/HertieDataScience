@@ -15,17 +15,6 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
-
-## About myself
-
-
-
-
-**Found errors?**
-
-- <a href="https://github.com/mhaber/HertieDataScience/issues"><i class="fa fa-exclamation-circle"></i> https://github.com/mhaber/HertieDataScience/issues</a>
-
-
 ## Plan for Today
 
 1. **Introductions**
@@ -36,13 +25,13 @@ knitr::opts_chunk$set(echo = FALSE)
 
 4. **Why Study Data Science?**
 
-5. **GitHub**
+5. **Logistics**
 
-6. **Organization**
 
 # Introductions
 
 ## About myself
+
 - Postdoc at Hertie since May 2015 (Governance Report)
 - PhD in PolSci (Uni Mannheim)
 - Research on parties, legislative politics, electoral behavior
@@ -50,13 +39,8 @@ knitr::opts_chunk$set(echo = FALSE)
 
 **Contact**:
 
-- <a href="mailto:haber@hertie-schoolorg"><i class="fa fa-envelope"></i> haber@hertie-schoolorg</a>
+- <a href="mailto:haber@hertie-school.org"><i class="fa fa-envelope"></i> haber@hertie-school.org</a>
 
-
-**Office Hours**:
-
-- Room: 3.60 (until 15 September)
-- By appointment
 
 ## About yourself
 - Who are you?
@@ -240,37 +224,135 @@ knitr::include_graphics("img/dataScience.jpg")
 
 3. Communicating the results \alert{(Visualization)}
 
-# Plan for the course
 
+# Why Study Data Science?
 
+## Research
 
-# Github
+**The 80-20 rule**
 
-## GitHub
+- Most data are messy
 
-Setup Git/GitHub for version control, collaboration, and remotely storing your files.
+    + You spent most of your time cleaning/preparing data
+    + You learn lot about the structure of your data
+    
+## Job opportunitites
 
-- Set up (free) GitHub account: <https://github.com/join>.
+- Data analysis skills are highly valued in businesses
+```{r, out.width = "200px", echo = F, fig.align='center'}
+knitr::include_graphics("img/RSalaries.png")
+```
+O'Reilly Data Science Survey 2016
 
-- Install GitHub application: <https://desktop.github.com/>.
+## Why R?
 
-## Statistics software
+- Open source: makes it highly customizable and easily extensible
+- Over 7,500 packages and counting
+- Used by many social scientists interested in data analysis
+- Powerful tool to generate elegant and effective plots
+- Command-line interface and scripts favors reproducibility.
+- Excellent documentation and online help resources.
 
-- Install software:
+## Why R?
 
-    + R (version 3.3.2): <http://cran.rstudio.com/>
-    + RStudio (dev build): <http://www.rstudio.org/download/daily/desktop/>
+- Becoming one of most popular languages in Data Science.
 
-- Make sure that you can install R packages
+```{r, out.width = "200px", echo = F, fig.align='center'}
+knitr::include_graphics("img/RLanguage.png")
+```
+
+IEEE Spectrum 2017
+
+# Logistics
+
+## Overview
+
+- We meet every Monday (except for days when there is no class)
+- Bring your own computer - R!
+- Material is/will be on [GitHub](https://github.com/mhaber/HertieDataScience/) and [Moodle](https://moodle.hertie-school.org/course/view.php?id=1657)
+
+**Office Hours**:
+
+- Room: 3.60 (until 15 September)
+- By appointment
+
+## Part I: Data Exploration
+
+- Data Visualization (11.09.)
+- Data Transformation (18.09.)
+- Exploratory Data Analysis (25.09.)
+
+## Part II: Data Wrangling
+
+- Data Import (02.10.)
+- Tidy Data (09.10.)
+- Relational Data (16.10.)
+- Working with Strings (30.10.)
+- Web Scraping (06.11.)
+
+## Part III: Data Communication
+
+- Markup languages (13.11.)
+- Graphics for communication (20.11)
+
+- **Guest Lecture – Work of a Data Scientist (27.11.)**
+
 
 ## Requirements
 
-**Homework Assignments**
+| Name                            | Percentage | Due             |
+|---------------------------------|------------|-----------------|
+| Homework Exercises              | 50%        | Weekly          |
+| Data Project                    | 40%        | Final Exam Week |
+| Attendance/active Participation | 10%        | -               |
 
-**Final research project**
+## Weekly homework exercises
 
-**Participation in class**
+- 10 small excercises
+- Can be completed in teams of two
+- Account for 5% each
+- Answers submitted mainly trough [Moodle](https://moodle.hertie-school.org/course/view.php?id=1657)
+- Due Sundays at 23:59
 
-- Regular attendance, active participation
-- Ask questions!!!
 
+## Final research project
+
+- Apply your data science skills to large dataset
+- Can be completed in teams of two
+- Due in the final exam week
+
+## Attendance/Participation
+
+- Regular attendance
+- Active participation (\alert{Ask questions!!!})
+- Found errors or have ideas for improvement? Submit issues to GitHub:
+
+<https://github.com/mhaber/HertieDataScience/issues>
+
+
+# Homework for next week
+
+## Install software
+
+- R:
+
+    + R (version 3.4.1): <http://cran.rstudio.com/>
+    + RStudio (dev build): <http://www.rstudio.org/download/daily/desktop/>
+
+- R packages
+
+    + devtools (for installing development versions)
+    + Tidyverse (R packages designed for data science)
+
+## GitHub
+
+**Setup Git/GitHub** 
+
+- Set up (free) GitHub account: <https://github.com/join>.
+
+- Integrate GitHub into RStudio: <https://www.r-bloggers.com/rstudio-and-github/>
+
+- Clone the course's repository to your project folder
+
+##  {.standout}
+That's it for today. Questions?
