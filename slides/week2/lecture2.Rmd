@@ -1,0 +1,199 @@
+---
+title: "Data Management With R: Data Visualization"
+author: "Matthias Haber"
+date: "4 September 2017"
+output:
+  beamer_presentation:
+    theme: "metropolis"
+    colortheme: "default"
+    fonttheme: "default"
+    fig_caption: false
+  ioslides_presentation:
+  slidy_presentation: default
+---
+
+## Plan for Today
+
+1. **Making sure everyone is set up**
+
+2. **Data visualization in base R**
+
+3. **Data visualization with ggplot2**
+
+4. **Excercises**
+
+# Making sure everyone is set up
+
+## Packages
+
+Load the tidyverse 
+```{r, message=FALSE}
+library(tidyverse)
+```
+
+If you get the error message "there is no package called ‘tidyverse’", you'll need to first install it, then run `library()` again.
+
+```{r eval = FALSE}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+# Data visualization in base R
+
+## Why do we use graphs in data analysis?
+
+- To understand data properties
+- To find patterns in data
+- To suggest modeling strategies
+- To "debug" analyses
+- To communicate results
+
+## Plotting with R
+
+R has a powerful graphics engine to produce high quality graphs e.g.:
+
+- `plot`: Basic plotting function (e.g. for scatter plots)
+- `hist()`: Histograms
+- `dotchart()`: Dot plots
+- `boxplot()`: Box-and-whisker plots
+
+## Histograms
+```{r, echo=T, fig.width= 4, fig.height = 2.5}
+# Create a histogram
+data(swiss)
+hist(swiss$Fertility, freq=FALSE, main="Fertility Rates")
+```
+
+## Dotchart
+
+```{r, echo=T, fig.width= 6, fig.height = 3.5}
+# Create a dot plot
+data(swiss)
+dotchart(swiss[1:5,2], labels=rownames(swiss))
+```
+
+# Data visualization with ggplot2
+
+## Why use ggplot2
+Base R functions like `plot` and `hist` are great for quickly displaying data but are not very aesthetic, and are limited in the quantity and type of information conveyed.
+
+R has several systems for making graphs, but `ggplot2` is one of the most elegant and most versatile. `ggplot2` implements the grammar of graphics, a coherent system for describing and building graphs.
+
+## ggplot2 examples
+
+```{r, out.width = "300px", echo = F, fig.align='center'}
+knitr::include_graphics("img/weather.png")
+```  
+
+[Source](http://rpubs.com/bradleyboehmke/weather_graphic)
+
+## ggplot2 examples
+
+```{r, out.width = "300px", echo = F, fig.align='center'}
+knitr::include_graphics("img/vaccination.png")
+```  
+
+[Source](https://benjaminlmoore.wordpress.com/2015/04/09/recreating-the-vaccination-heatmaps-in-r/)
+
+## ggplot2 examples
+
+```{r, out.width = "300px", echo = F, fig.align='center'}
+knitr::include_graphics("img/aircraft.png")
+``` 
+
+[Source](https://www.quora.com/What-is-the-most-elegant-plot-you-have-made-using-ggplot2-in-R-Embed-the-code-if-possible)
+
+## ggplot2 examples
+
+```{r, out.width = "300px", echo = F, fig.align='center'}
+knitr::include_graphics("img/map.png")
+``` 
+
+[Source](https://github.com/hrbrmstr/ggcounty)
+
+## The grammar of graphics
+- Each plot is made of layers. Layers include the coordinate system (x-y), points, labels, etc.
+- Each layer has aesthetics (`aes`) including x & y, size, shape, and color.
+- The main layer types are called geometrics(`geom`) and include
+lines, points, etc.
+
+## The grammar of graphics
+
+```{r, out.width = "300px", echo = F, fig.align='center'}
+knitr::include_graphics("img/ggplot.png")
+``` 
+
+[Source](http://stcorp.nl/R_course/tutorial_ggplot2.html)
+
+## Components of a ggplot2 graph
+
+- \alert{data:} Variables mapped to aesthetic attributes
+- \alert{aesthetic}: Visual property of the plot objects
+- \alert{geom:} Geometrical object used to represent data
+- \alert{stats:} Statistical transformations of the data
+- \alert{scales:} Values mapped to aesthetic attributes
+- \alert{coord:} Coordinate system
+- \alert{facets:} Subplots that each display one subset of the data
+
+## ggplot2 basic
+
+A `ggplot` is build piece by piece
+
+1. We need some data to be plotted
+
+# Exercises
+
+## Aesthetic mappings
+
+1. What's gone wrong with this code?
+
+```{r, fig.width= 5, fig.height = 2.4}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, 
+                           color = "blue"))
+```
+
+## Aesthetic mappings
+
+2. Map a continuous variable from _mpg_ to color, size, and shape. How do these aesthetics behave differently for categorical vs. continuous variables?
+
+# Group Exercises
+
+## Group Exercises
+In the rest of the class, I want you to work in teams of two and try to reproduce the following plots.
+
+If you need help, this [Cheatsheet](https://www.rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf) may come in handy.
+
+
+## Plot 1
+
+Recreate the R code necessary to generate the following graph.
+
+```{r echo=FALSE,fig.width= 5, fig.height = 2.4,message = FALSE}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+      geom_point() + 
+      geom_smooth(se = FALSE)
+```
+
+
+## Plot 2
+
+Recreate the R code necessary to generate the following graph.
+
+```{r echo=FALSE,fig.width= 5, fig.height = 2.4,message = FALSE}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+    geom_point(aes(colour = drv)) +
+    geom_smooth(se = FALSE)
+```
+
+## Final thoughts
+
+```{r, out.width = "300px", echo = F, fig.align='center'}
+knitr::include_graphics("img/facebook.png")
+```
+
+[Source](https://www.facebook.com/notes/facebook-engineering/visualizing-friendships/469716398919)
+
+##  {.standout}
+That's it for today. Questions?    
+
