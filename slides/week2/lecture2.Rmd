@@ -85,7 +85,7 @@ R has several systems for making graphs, but `ggplot2` is one of the most elegan
 knitr::include_graphics("img/weather.png")
 ```  
 
-[Source](http://rpubs.com/bradleyboehmke/weather_graphic)
+[Source: http://rpubs.com/bradleyboehmke/weather_graphic](http://rpubs.com/bradleyboehmke/weather_graphic)
 
 ## ggplot2 examples
 
@@ -93,7 +93,7 @@ knitr::include_graphics("img/weather.png")
 knitr::include_graphics("img/vaccination.png")
 ```  
 
-[Source](https://benjaminlmoore.wordpress.com/2015/04/09/recreating-the-vaccination-heatmaps-in-r/)
+[Source: https://benjaminlmoore.wordpress.com/2015/04/09/recreating-the-vaccination-heatmaps-in-r/](https://benjaminlmoore.wordpress.com/2015/04/09/recreating-the-vaccination-heatmaps-in-r/)
 
 ## ggplot2 examples
 
@@ -101,7 +101,7 @@ knitr::include_graphics("img/vaccination.png")
 knitr::include_graphics("img/aircraft.png")
 ``` 
 
-[Source](https://www.quora.com/What-is-the-most-elegant-plot-you-have-made-using-ggplot2-in-R-Embed-the-code-if-possible)
+[Source: https://www.quora.com/What-is-the-most-elegant-plot-you-have-made-using-ggplot2-in-R-Embed-the-code-if-possible](https://www.quora.com/What-is-the-most-elegant-plot-you-have-made-using-ggplot2-in-R-Embed-the-code-if-possible)
 
 ## ggplot2 examples
 
@@ -109,7 +109,7 @@ knitr::include_graphics("img/aircraft.png")
 knitr::include_graphics("img/map.png")
 ``` 
 
-[Source](https://github.com/hrbrmstr/ggcounty)
+[Source: https://github.com/hrbrmstr/ggcounty](https://github.com/hrbrmstr/ggcounty)
 
 ## The grammar of graphics
 - Each plot is made of layers. Layers include the coordinate system (x-y), points, labels, etc.
@@ -123,7 +123,7 @@ lines, points, etc.
 knitr::include_graphics("img/ggplot.png")
 ``` 
 
-[Source](http://stcorp.nl/R_course/tutorial_ggplot2.html)
+[Source: http://stcorp.nl/R_course/tutorial_ggplot2.html](http://stcorp.nl/R_course/tutorial_ggplot2.html)
 
 ## Components of a ggplot2 graph
 
@@ -162,7 +162,7 @@ ggplot(data = mpg) +
 ## Group Exercises
 In the rest of the class, I want you to work in teams of two and try to reproduce the following plots.
 
-If you need help, this [Cheatsheet](https://www.rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf) may come in handy.
+If you need help, this [Cheatsheet: https://www.rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf](https://www.rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf) may come in handy.
 
 
 ## Plot 1
@@ -192,7 +192,7 @@ ggplot(mpg, aes(x = displ, y = hwy)) +
 knitr::include_graphics("img/facebook.png")
 ```
 
-[Source](https://www.facebook.com/notes/facebook-engineering/visualizing-friendships/469716398919)
+[Source: https://www.facebook.com/notes/facebook-engineering/visualizing-friendships/469716398919](https://www.facebook.com/notes/facebook-engineering/visualizing-friendships/469716398919)
 
 ##  {.standout}
 That's it for today. Questions?    
