@@ -1,0 +1,172 @@
+---
+title: "Data Management With R: Data Transformation"
+author: "Matthias Haber"
+date: "18 September 2017"
+output:
+  beamer_presentation:
+    theme: "metropolis"
+    colortheme: "default"
+    fonttheme: "default"
+    fig_caption: false
+    df_print: kable
+    toc: true
+  ioslides_presentation:
+  slidy_presentation: default
+  linkcolor: "red"
+---
+
+# Making sure everyone is set up
+
+## Packages
+
+```{r, message=FALSE}
+library(tidyverse)
+```
+
+## Data
+
+336,776 flights that departed from New York City in 2013
+
+```{r, message=FALSE}
+# install.packages("nycflights13")
+library(nycflights13)
+```
+
+```{r, echo = FALSE}
+flights[1:4, 1:6]
+```
+
+# Data transformation with dplyr
+
+## Piping
+
+The pipe operator `%>%` (Ctrl/Cmd+Shift+M) allows you to write code in sequences which has several benefits:
+
+- serves the natural way of reading ("First this, then this, ...")
+- avoids nested function calls
+- minimizes the need for local variables and function definitions
+
+## Piping
+
+`dplyr` is designed to work with the pipe, so this
+
+```{r, eval=FALSE}
+df %>% 
+  select(x, y) %>% 
+  filter(year == 2017)
+```
+
+returns the sames as this
+
+```{r, eval=FALSE}
+filter(select(df, x, y), year == 2017)
+```
+
+## Variable types
+
+- \alert{int}: integers
+
+- \alert{dbl}: doubles, or real numbers
+
+- \alert{chr}: character vectors, or strings
+
+- \alert{dttm}: date-times (a date + a time)
+
+- \alert{lgl}: logical, vectors that contain only `TRUE` or `FALSE`
+
+- \alert{fctr}: factors
+
+- \alert{date}: dates
+
+## `dplyr` core functions
+
+- `filter()`: select rows by their values
+- `select()`: select columns by their names
+- `arrange()`: order rows
+- `mutate()`: create new variables
+- `summarize()`: collapse many values down to a single summary
+- `group_by()`: operate on it group-by-group
+
+- `rename()`: rename columns
+- `distinct()`: find distinct rows
+
+Command structure (for all dplyr verbs):
+
+- first argument is a data frame
+- return value is a data frame
+- nothing is modified in place
+
+
+## `filter()`
+
+`filter()` allows to subset observations based on their values. The function takes logical expressions and returns the rows for which all are `TRUE`. 
+
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/filter.png")
+```  
+
+## `filter()`
+
+Let's select all flights on January 1st:
+
+```{r, eval = FALSE}
+filter(flights, month == 1, day == 1)
+```
+```{r, echo = FALSE}
+filter(flights, month == 1, day == 1)[1:6, 1:6]
+```
+
+## `filter()`
+
+`filter()` revolves around using comparison operators: 
+`>`, `>=`, `<`, `<=`, `!=` (not equal), and `==` (equal).
+
+`dplyr` functions like `filter()` never modify inputs but instead return a new data frame that needs to be assigned to an object if you want to save the result.   
+```{r}
+jan1 <- filter(flights, month == 1, day == 1)
+```
+
+## Combining conditions
+
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/operators.png")
+``` 
+
+## `select()`
+
+`select()` allows to select variables. 
+
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/select.png")
+```  
+
+## `mutate()`
+
+`mutate()` allows to select variables. 
+
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/mutate.png")
+```  
+
+
+## `summarize()`
+
+`summarize()` allows to select variables. 
+
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/summarise.png")
+```  
+
+
+## `group_by()`
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/group.png")
+```  
+
+# Homework Exercises
+
+## Homework Exercises
+
+##  {.standout}
+That's it for today. Questions?    
+
