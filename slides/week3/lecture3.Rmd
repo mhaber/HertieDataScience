@@ -8,12 +8,98 @@ output:
     colortheme: "default"
     fonttheme: "default"
     fig_caption: false
-    df_print: kable
+    df_print: default
     toc: true
   ioslides_presentation:
   slidy_presentation: default
   linkcolor: "red"
 ---
+
+# Last week's homework
+
+## Plot 1
+```{r, echo = FALSE}
+library(ggplot2)
+```
+
+
+```{r, eval = FALSE, message = FALSE}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  geom_smooth(se = FALSE) +
+  labs(
+    title = "Fuel efficiency generally decreases with
+    engine size",
+    subtitle = "Two seaters (sports cars) are an
+    exception because of their light weight",
+    caption = "Data from fueleconomy.gov"
+  )
+```
+
+
+## Plot 1
+
+```{r, echo = FALSE, message = FALSE}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  geom_smooth(se = FALSE) +
+  labs(
+    title = "Fuel efficiency generally decreases with
+    engine size",
+    subtitle = "Two seaters (sports cars) are an
+    exception because of their light weight",
+    caption = "Data from fueleconomy.gov"
+  )
+```
+
+## Plot 2
+
+```{r eval = FALSE, message = FALSE}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(colour = drv)) +
+  geom_smooth(aes(linetype = drv), se = FALSE,
+              method = "loess")
+```
+
+## Plot 2
+
+```{r echo = FALSE, message = FALSE}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(colour = drv)) +
+  geom_smooth(aes(linetype = drv), se = FALSE,
+              method = "loess")
+```
+
+## Plot 3
+```{r eval = FALSE, message = FALSE}
+ggplot(data = diamonds,
+       mapping = aes(x = price, fill = cut)) +
+  geom_bar(stat = "bin")
+```
+
+## Plot 3
+
+```{r echo = FALSE, message = FALSE}
+ggplot(data = diamonds,
+       mapping = aes(x = price, fill = cut)) +
+  geom_bar(stat = "bin")
+```
+
+## Plot 4
+```{r, eval = FALSE, message = FALSE}
+ggplot(data = diamonds, 
+       mapping = aes(x = carat, y = price)) + 
+  geom_smooth(alpha = 0.3) + 
+  facet_grid(cut ~ color)
+```
+
+## Plot 4
+```{r, echo = FALSE, message = FALSE}
+ggplot(data = diamonds, 
+       mapping = aes(x = carat, y = price)) + 
+  geom_smooth(alpha = 0.3) + 
+  facet_grid(cut ~ color)
+```
 
 # Making sure everyone is set up
 
@@ -32,8 +118,8 @@ library(tidyverse)
 library(nycflights13)
 ```
 
-```{r, echo = FALSE}
-flights[1:4, 1:6]
+```{r echo = FALSE}
+knitr::kable(flights[1:4, 1:6])
 ```
 
 # Data transformation with dplyr
@@ -81,12 +167,12 @@ filter(select(df, x, y), year == 2017)
 ## `dplyr` core functions
 
 - `filter()`: select rows by their values
-- `select()`: select columns by their names
 - `arrange()`: order rows
+- `select()`: select columns by their names
 - `mutate()`: create new variables
 - `summarize()`: collapse many values down to a single summary
-- `group_by()`: operate on it group-by-group
 
+- `group_by()`: operate on it group-by-group
 - `rename()`: rename columns
 - `distinct()`: find distinct rows
 
@@ -112,8 +198,8 @@ Let's select all flights on January 1st:
 ```{r, eval = FALSE}
 filter(flights, month == 1, day == 1)
 ```
-```{r, echo = FALSE}
-filter(flights, month == 1, day == 1)[1:6, 1:6]
+```{r echo = FALSE}
+knitr::kable(filter(flights, month == 1, day == 1)[1:6, 1:6])
 ```
 
 ## `filter()`
@@ -126,46 +212,288 @@ filter(flights, month == 1, day == 1)[1:6, 1:6]
 jan1 <- filter(flights, month == 1, day == 1)
 ```
 
-## Combining conditions
+## Boolean operators
+
+`filter()` also supports the Boolean operators `&` ("and"), `|` ("or"), and `!` (is "not").
 
 ```{r, out.width = "250px", echo = F, fig.align='center'}
 knitr::include_graphics("img/operators.png")
 ``` 
 
+De Morgan's law: `!(x & y)` = `!x | !y` & `!(x | y)` = `!x & !y`
+
+## Boolean operators
+
+Why does this not work?
+
+```{r, eval = FALSE}
+filter(flights, month == 11 | 12)
+```
+
+Generally a good idea to use `x %in% y`, which will select every row where `x` is part of the values of `y`.
+
+```{r, eval = FALSE}
+filter(flights, month %in% c(11, 12))
+```
+
+## `between` condition
+
+Another useful dplyr filtering helper is `between()`. `between(x, left, right)` is equivalent to `x >= left & x <= right`.
+
+```{r}
+
+```
+
+To `filter()` all flights that departed between midnight and 6am (inclusive): 
+
+```{r, eval = FALSE}
+filter(flights, between(dep_time, 0, 600))
+```
+
+## `filter()` exclusion
+
+`filter()` by default excludes `FALSE` and `NA` values. 
+```{r, df_print = "default"}
+df <- tibble(x = c(1, NA, 3))
+filter(df, x > 1)
+```
+
+## `filter()` exclusion
+
+If you want to preserve missing values, you have to explicitly state it.
+```{r}
+filter(df, is.na(x) | x > 1)
+```
+
+## `filter()` exercises
+
+1.  Find all flights that
+
+    a. Had an arrival delay of two or more hours
+    b. Arrived more than two hours late, but didn't leave late
+    c. Flew to Houston (`IAH` or `HOU`)
+    d. Were operated by United, American, or Delta
+    e. Departed in summer (July, August, and September)
+
+## `arrange()`
+
+`arrange()` takes a data frame and a set of column names to order the rows by. Multiple column names are evaluated subsequently.    
+
+```{r, eval = FALSE}
+arrange(flights, year, month, day)
+```
+
+```{r, echo = FALSE}
+knitr::kable(arrange(flights, year, month, day)[1:6, 1:6])
+```
+
+## `arrange()` in descending order
+By dafault `arrange()` sorts values in ascending order. Use `desc()` to re-order by a column in descending order.
+
+```{r, eval = FALSE}
+arrange(flights, desc(arr_delay))
+```
+
+```{r, echo = FALSE}
+knitr::kable(arrange(flights, desc(arr_delay))[1:6, 1:6])
+```
+
+## `arrange()` exercises
+2. Sort `flights` to 
+
+    a. find the flight that left earliest
+    b. find the most delayed flight
+    c. find the flight that travelled the longest and that travelled the shortest
+
 ## `select()`
 
-`select()` allows to select variables. 
+`select()` is used to select a subset of variables from a dataset. 
 
 ```{r, out.width = "250px", echo = F, fig.align='center'}
 knitr::include_graphics("img/select.png")
 ```  
 
+```{r, eval = FALSE}
+select(flights, year, month, day)
+```
+
+```{r, echo = FALSE}
+knitr::kable(select(flights, year, month, day)[1:4,])
+```
+
+## `select()`
+
+`select()` has various helper functions:
+
+* `everything()`: selects all variables.
+
+* `starts_with("abc")`: matches names that begin with "abc".
+
+* `ends_with("xyz")`: matches names that end with "xyz".
+
+* `contains("ijk")`: matches names that contain "ijk".
+
+* `matches("(.)\\1")`: selects variables that match a regular expression.
+
+*  `num_range("x", 1:3)` matches `x1`, `x2` and `x3`.
+   
+See `?select` for more details.
+
+## `select()`
+
+You can use `select()` to rename variables
+
+```{r, eval = FALSE}
+select(flights, tail_num = tailnum)
+```
+
+which will drop all of the variables not explicitly mentioned. Therefore it's better to use `rename()` instead:
+
+```{r, eval = FALSE}
+rename(flights, tail_num = tailnum)
+```
+
+## `select()` exercises
+
+3.1 What are three distinct ways to select `dep_time`, `dep_delay`,
+    `arr_time`, and `arr_delay` from `flights`.
+
+3.2 What does the `one_of()` function do? Why might it be helpful in conjunction with this vector?
+
+```{r}
+vars <- c("year", "month", "day", "dep_delay",
+          "arr_delay")
+```
+
 ## `mutate()`
 
-`mutate()` allows to select variables. 
+`mutate()` allows to add new columns to the end of your dataset that are functions of existing columns.
 
 ```{r, out.width = "250px", echo = F, fig.align='center'}
 knitr::include_graphics("img/mutate.png")
 ```  
 
+## `mutate()`
+
+```{r, eval = FALSE}
+flights %>% 
+  select(ends_with("delay"), distance, air_time) %>% 
+  mutate(gain = arr_delay - dep_delay,
+         speed = distance / air_time * 60
+)
+```
+
+```{r, echo = FALSE}
+test <- flights %>% 
+  select(ends_with("delay"), distance, air_time) %>% 
+  mutate(gain = arr_delay - dep_delay,
+         speed = distance / air_time * 60
+)
+knitr::kable(test[1:6,])
+```
+
+## `transmute()`
+
+Use `transmute()` to only keep the new variables:
+
+```{r, eval = FALSE}
+transmute(flights,
+  gain = arr_delay - dep_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+## Functions to use with `mutate()`
+There are many functions for creating new variables with `mutate()`:
+
+* Arithmetic operators: `+`, `-`, `*`, `/`, `^` (e.g. `air_time / 60`).
+* Aggregate functions: `sum(x)` `mean(y)` (e.g. `mean(dep_delay)`).
+* Modular arithmetic: `%/%` (integer division) and `%%` (remainder), where
+    `x == y * (x %/% y) + (x %% y)`.
+* Logs: `log()`, `log2()`, `log10()`.
+* Offsets: `lead()` and `lag()` (e.g. `x - lag(x)`).
+* Cumulative and rolling aggregates: `cumsum()`, `cumprod()`, `cummin()`, `cummax()`, `cummean()`.    
+* Logical comparisons, `<`, `<=`, `>`, `>=`, `!=`.
+* Ranking: `min_rank()`, `row_number()`, `dense_rank()`, `percent_rank()`, `cume_dist()`, `ntile()`.
+
+## `mutate()` exercises
+
+4. Use `mutate()` to
+
+    a. Create new variables for `dep_time` and `sched_dep_time` that measure times in the number of minutes.
+    b. Compare `air_time` with `arr_time - dep_time`. What do you see? What do you need to do to fix it?
+    c. Find the 10 most delayed flights using a ranking function. How do you want to handle ties?
 
 ## `summarize()`
 
-`summarize()` allows to select variables. 
+`summarize()` collapses a data frame to a single row.
 
 ```{r, out.width = "250px", echo = F, fig.align='center'}
 knitr::include_graphics("img/summarise.png")
 ```  
 
+```{r}
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+```
 
-## `group_by()`
+## `summarize()` with `group_by()`
+`summarize()` is most effectively used with `group_by()`, which changes the unit of analysis from the complete dataset to individual groups. 
+
 ```{r, out.width = "250px", echo = F, fig.align='center'}
 knitr::include_graphics("img/group.png")
 ```  
 
+Grouping is most useful in conjunction with `summarise()`, but you can also do convenient operations with `mutate()` and `filter()`.
+
+## `summarize()` with `group_by()`
+For example, to get the average delay per date
+
+```{r, eval = FALSE}
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(delay = mean(dep_delay, na.rm = TRUE))
+```
+
+
+
+## `summarize()` count
+For aggregations it is generally a good idea to include a count `n()`. For example, let’s look at the (not cancelled) planes that have the highest average delays:
+
+```{r, eval = FALSE}
+flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+  group_by(tailnum) %>% 
+  summarise(delay = mean(arr_delay)) %>% 
+  arrange(delay)
+```
+
+
+## `summarize()` useful functions
+
+There are a number of useful summary functions:
+
+* Measures of location: `mean(x)`, `sum(x)`, `median(x)`.
+* Measures of spread: `sd(x)`, `IQR(x)`, `mad(x)`.
+* Measures of rank: `min(x)`, `quantile(x, 0.25)`, `max(x)`.
+* Measures of position: `first(x)`, `nth(x, 2)`, `last(x)`.
+* Counts: `n()`, `sum(!is.na(x))`, `n_distinct(x)`.
+* Counts and proportions of logical values: `sum(x > 10)`, `mean(y == 0)`.
+
+## `summarize()` exercises
+
+5. Use `summarize()` to 
+
+    a. Look at the number of cancelled flights per day. Is there a pattern? Is the proportion of cancelled flights related to the average delay?
+    b. Find the carrier with the worst delays.
+
+
 # Homework Exercises
 
 ## Homework Exercises
+For this week's homework exersises go to Moodle and answer the Quiz posted in the Data Transformation section. You will be asked a number of questions randomly selected from a question pool. If you work in pairs, then you might get two different sets of questions. 
+
+Deadline: Sunday, September 24 before midnight.
 
 ##  {.standout}
 That's it for today. Questions?    
