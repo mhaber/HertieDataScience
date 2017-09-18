@@ -138,14 +138,14 @@ The pipe operator `%>%` (Ctrl/Cmd+Shift+M) allows you to write code in sequences
 
 ```{r, eval=FALSE}
 df %>% 
-  select(x, y) %>% 
-  filter(year == 2017)
+  filter(year == 2017)  %>% 
+  select(x, y)
 ```
 
 returns the sames as this
 
 ```{r, eval=FALSE}
-filter(select(df, x, y), year == 2017)
+select(filter(df, year == 2017) x, y)
 ```
 
 ## Variable types
@@ -214,7 +214,7 @@ jan1 <- filter(flights, month == 1, day == 1)
 
 ## Boolean operators
 
-`filter()` also supports the Boolean operators `&` ("and"), `|` ("or"), and `!` (is "not").
+`filter()` also supports the Boolean operators `&` ("and"), `|` ("or"), `!` (is "not"), and `xor` (exclusive "or".
 
 ```{r, out.width = "250px", echo = F, fig.align='center'}
 knitr::include_graphics("img/operators.png")
@@ -269,11 +269,43 @@ filter(df, is.na(x) | x > 1)
 
 1.  Find all flights that
 
-    a. Had an arrival delay of two or more hours
-    b. Arrived more than two hours late, but didn't leave late
-    c. Flew to Houston (`IAH` or `HOU`)
-    d. Were operated by United, American, or Delta
-    e. Departed in summer (July, August, and September)
+    a. Had an arrival delay of two or more hours.
+    b. Arrived more than two hours late, but didn't leave late.
+    c. Flew to Houston (`IAH` or `HOU`).
+    d. Were operated by United, American, or Delta.
+    e. Departed in summer (July, August, and September).
+
+## `filter()` exercises solutions
+Arrival delay of two or more hours
+```{r, eval = FALSE}
+flights %>% 
+  filter(arr_delay > 120)
+```
+
+Arrived more than two hours late, but didn't leave late
+```{r, eval = FALSE}
+flights %>% 
+filter(!is.na(dep_delay), dep_delay <= 0, arr_delay > 120)
+```
+
+Flew to Houston (`IAH` or `HOU`)
+```{r, eval = FALSE}
+flights %>%
+  filter(dest %in% c("IAH", "HOU"))
+```
+
+## `filter()` exercises solutions
+Were operated by United, American, or Delta
+```{r, eval = FALSE}
+flights %>% 
+filter(carrier %in% c("AA", "DL", "UA"))
+```
+
+Departed in summer (July, August, and September)
+```{r, eval = FALSE}
+flights %>% 
+filter(between(month, 7, 9))
+```
 
 ## `arrange()`
 
@@ -301,9 +333,29 @@ knitr::kable(arrange(flights, desc(arr_delay))[1:6, 1:6])
 ## `arrange()` exercises
 2. Sort `flights` to 
 
-    a. find the flight that left earliest
-    b. find the most delayed flight
-    c. find the flight that travelled the longest and that travelled the shortest
+    a. find the flight that departed the earliest (earlier than scheduled)
+    b. find the most delayed flight.
+    c. find the flight that travelled the longest and that travelled the shortest distance.
+
+## `arrange()` exercises solutions
+
+Flight B6 97 left the earliest (43 minutes early).
+```{r, eval = FALSE}
+flights %>% 
+arrange(dep_delay)
+```
+
+Flight HA 51 is the most delayed flight (1301 minutes delay).
+```{r, eval = FALSE}
+flights %>% 
+arrange(desc(dep_delay))
+```
+
+Flight HA 51 is the longest (4,983 miles), flight US 1632 is the shortest (17 miles).
+```{r, eval = FALSE}
+flights %>% 
+arrange(desc(distance))
+```
 
 ## `select()`
 
@@ -364,6 +416,29 @@ rename(flights, tail_num = tailnum)
 vars <- c("year", "month", "day", "dep_delay",
           "arr_delay")
 ```
+    
+## `select()` exercise solutions
+
+Three distinct ways to select variables.
+
+```{r, eval = FALSE}
+select(flights, dep_time, dep_delay, arr_time, arr_delay)
+```
+
+```{r, eval = FALSE}
+select(flights, starts_with("dep_"), starts_with("arr_"))
+```
+
+```{r, eval = FALSE}
+select(flights, matches("^(dep|arr)_(time|delay)$"))
+```
+
+What does the `one_of()` function do?
+```{r, eval = FALSE}
+vars <- c("year", "month", "day", "dep_delay",
+          "arr_delay")
+select(flights, one_of(vars))
+```
 
 ## `mutate()`
 
@@ -421,9 +496,41 @@ There are many functions for creating new variables with `mutate()`:
 
 4. Use `mutate()` to
 
-    a. Create new variables for `dep_time` and `sched_dep_time` that measure times in the number of minutes.
+    a. Create new variables for `dep_time` and `sched_dep_time` that measure time in the number of minutes after midnight.
     b. Compare `air_time` with `arr_time - dep_time`. What do you see? What do you need to do to fix it?
     c. Find the 10 most delayed flights using a ranking function. How do you want to handle ties?
+
+## `mutate()` exercise solutions
+
+New variables for `dep_time` and `sched_dep_time`
+```{r, eval = FALSE}
+flights %>% 
+  mutate(dep_time2 = dep_time %/% 100 * 60 + 
+           dep_time %% 100,
+         sched_dep_time2 = sched_dep_time %/% 100 *
+           60 + sched_dep_time %% 100) %>%
+  select(dep_time, dep_time2, sched_dep_time,
+         sched_dep_time2)
+```
+
+## `mutate()` exercise solutions
+
+`arr_time` and `dep_time` may be in different time zones.
+```{r, eval = FALSE}
+flights %>% 
+  mutate(air_time2 = arr_time - dep_time,
+       air_time_diff = air_time2 - air_time) %>%
+  filter(air_time_diff != 0) %>%
+  select(air_time, air_time2, dep_time, arr_time, dest)
+```
+
+10 most delayed flights
+```{r, eval = FALSE}
+flights %>% 
+  mutate(dep_delay_rank = min_rank(-dep_delay)) %>%
+  arrange(dep_delay_rank) %>% 
+  filter(dep_delay_rank <= 10)
+```
 
 ## `summarize()`
 
@@ -487,6 +594,36 @@ There are a number of useful summary functions:
     a. Look at the number of cancelled flights per day. Is there a pattern? Is the proportion of cancelled flights related to the average delay?
     b. Find the carrier with the worst delays.
 
+
+## `summarize()` exercises solutions
+Number of cancelled flights per day
+
+```{r}
+cancelled_delayed <- 
+  flights %>%
+  mutate(cancelled = (is.na(arr_delay) | 
+                        is.na(dep_delay))) %>%
+  group_by(year, month, day) %>%
+  summarise(prop_cancelled = mean(cancelled),
+            avg_dep_delay = mean(dep_delay, na.rm = TRUE))
+```
+
+## `summarize()` exercises solutions
+```{r, message = FALSE, echo =FALSE}
+ggplot(cancelled_delayed, aes(x = avg_dep_delay, prop_cancelled)) +
+  geom_point() +
+  geom_smooth()
+```
+
+
+## `summarize()` exercises solutions
+Frontier Airlines (FL) has the worst delays.
+```{r, eval = FALSE}
+flights %>%
+  group_by(carrier) %>%
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(arr_delay))
+```
 
 # Homework Exercises
 
