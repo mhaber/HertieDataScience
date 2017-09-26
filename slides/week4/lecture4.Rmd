@@ -39,6 +39,7 @@ str(diamonds)
 str(mpg)
 ```
 
+
 # Last week's homework
 
 ## Homework Question 1
@@ -272,6 +273,21 @@ diamonds %>%
     b. Explore the distribution of `price`. Do you discover anything unusual or surprising?
     c. How many diamonds are 0.99 carat? How many are 1 carat? What do you think is the cause of the difference?
 
+## Exercises solutions
+
+1.1 Explore the distribution of `x`, `y`, and `z`.
+
+- They are right skewed (lots of small diamonds but few very large ones).
+- There is an outlier in y, and z.
+- All three distributions are bimodal
+
+1.2 Explore the distribution of `price`.
+
+- There are no diamonds with a price of 1500
+
+1.3 How many diamonds are 0.99 carat?
+
+- 70 times more 1 carat diamonds than 0.99 carat diamond.
 
 # Missing values
 
@@ -310,6 +326,13 @@ diamonds2 %>%
 ## Exercises
 2.1  What happens to missing values in a histogram?  What happens to missing
     values in a bar chart? Why is there a difference?
+
+
+## Exercises solutions
+
+2.1 What happens to missing values in a histogram / bar chart?
+
+- In `geom_histogram` missing values are removed. In `geom_bar`, `NA` is treated as another category.
 
 
 # Covariation
@@ -380,6 +403,63 @@ mpg %>%
     or a coloured `geom_freqpoly()`. What are the pros and cons of each 
     method?
 
+## Exercises solutions
+
+3.1 Departure times of cancelled vs. non-cancelled flights
+```{r, eval = FALSE}
+nycflights13::flights %>% 
+  mutate(
+    cancelled = is.na(dep_time),
+    sched_hour = sched_dep_time %/% 100,
+    sched_min = sched_dep_time %% 100,
+    sched_dep_time = sched_hour + sched_min / 60
+  ) %>% 
+  ggplot() +
+    geom_boxplot(mapping = aes(y = sched_dep_time,
+                               x = cancelled))
+```
+
+## Exercises solutions
+3.1 Departure times of cancelled vs. non-cancelled flights
+```{r, echo = FALSE}
+nycflights13::flights %>% 
+  mutate(
+    cancelled = is.na(dep_time),
+    sched_hour = sched_dep_time %/% 100,
+    sched_min = sched_dep_time %% 100,
+    sched_dep_time = sched_hour + sched_min / 60
+  ) %>% 
+  ggplot() +
+    geom_boxplot(mapping = aes(y = sched_dep_time,
+                               x = cancelled))
+```
+
+## Exercises solutions
+```{r, fig.height=4}
+# `geom_freqpoly()`
+diamonds %>% 
+  ggplot(mapping = aes(x = price, y = ..density..)) + 
+  geom_freqpoly(aes(colour = cut), binwidth = 500)
+```
+
+## Exercises solutions
+```{r, fig.height=3.7, message=FALSE}
+# `geom_violin`
+diamonds %>% 
+  ggplot(mapping = aes(x = price)) + 
+  geom_histogram() +
+  facet_wrap(~ cut, ncol = 1, scales = "free_y")
+```
+
+## Exercises solutions
+```{r, fig.height=3.7}
+# facetted `geom_histogram`
+diamonds %>% 
+  ggplot(mapping = aes(x = cut, y = price)) + 
+  geom_violin() +
+  coord_flip()
+```
+
 ## Covariation between two categorical variables
 To visualise the covariation between categorical variables, we'll need to count the number of observations for each combination.
 
@@ -406,6 +486,45 @@ diamonds %>%
 4.2 Use `geom_tile()` together with dplyr to explore how average flight
     delays vary by destination and month of year.  What makes the 
     plot difficult to read? How could you improve it?
+
+## Exercises solutions
+4.1. Why is it better to use `aes(x = color, y = cut)`
+
+- Better to plot the categorical variable with a larger number of categories or the longer labels on the y-axis
+- Plot becomes easier to read
+
+## Exercises solutions
+4.2 Explore how average flight delays vary by destination and month.
+```{r, eval=FALSE}
+flights %>%
+  group_by(month, dest) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  ggplot(aes(x = factor(month), y = dest,
+             fill = dep_delay)) +
+  geom_tile() +
+  labs(x = "Month", y = "Destination",
+       fill = "Departure Delay")
+```
+
+## Exercises solutions
+4.2 Explore how average flight delays vary by destination and month.
+```{r, echo=FALSE}
+flights %>%
+  group_by(month, dest) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  ggplot(aes(x = factor(month), y = dest,
+             fill = dep_delay)) +
+  geom_tile() +
+  labs(x = "Month", y = "Destination",
+       fill = "Departure Delay")
+```
+
+## Exercises solutions
+4.2 Explore how average flight delays vary by destination and month. What makes the plot difficult to read? How could you improve it?
+
+- sort destinations by a meaningful quanity (e.g. distance)
+- remove missing values
+- better color scheme
 
 
 ## Covariation between two continuous variables
@@ -458,6 +577,29 @@ diamonds %>%
 5.1 Visualise the distribution of carat, partitioned by price. How does the price distribution of very large diamonds compare to small diamonds (Hint: Look at the `cut_number` function).
 
 5.2 Visualise the combined distribution of cut, carat, and price (Hint: Look at the `cut_number` function).
+
+## Exercises solutions
+
+5.1 Visualise the distribution of carat, partitioned by price.
+
+```{r, fig.height=4}
+diamonds %>% 
+  ggplot(mapping = aes(x = cut_number(price, 10), 
+                       y = carat)) +
+  geom_boxplot() +
+  coord_flip()
+```
+
+## Exercises solutions
+
+5.2 Visualise the combined distribution of cut, carat, and price.
+
+```{r, fig.height=4}
+diamonds %>% 
+  ggplot(mapping = aes(x = cut_number(carat, 5), 
+                     y = price, color = cut)) +
+  geom_boxplot()
+```
 
 # Final Remarks about Patterns
 
