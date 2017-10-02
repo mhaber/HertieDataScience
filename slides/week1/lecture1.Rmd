@@ -342,7 +342,7 @@ IEEE Spectrum 2017
 - R packages
 
     + devtools (for installing development versions)
-    + Tidyverse (R packages designed for data science)
+    + tidyverse (R packages designed for data science)
 
 ## GitHub
 
