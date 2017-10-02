@@ -18,15 +18,16 @@ output:
 
 ## Packages
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 # install.packages("tidyverse")
 library(tidyverse)
 ```
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 library(readxl)
 library(DBI)
 library(RMySQL) # install.packages("RMySQL")
+library(httr)
 library(jsonlite)
 library(haven)
 ```
@@ -35,8 +36,16 @@ library(haven)
 Today we'll work with a number of datasets. They are located in 
 _slides/week5/data_ and on moodle.
 
-* _potatoes_: Impact of storage period and cooking on potatoes' flavor
-*_urbanpop_: worldwide urban population metrics over time
+* _potatoes_: impact of storage and cooking on potatoes' flavor
+
+* _urbanpop_: worldwide urban population metrics over time
+
+* _sales_: data on the age, gender, income, and purchase level
+
+* _sugar_: data on yearly import and export numbers of sugar
+
+* _personality_: data on Big Five personality traits for 434 persons
+
 # Importing data from flat files
 
 ## `read.table()`
@@ -48,7 +57,8 @@ _slides/week5/data_ and on moodle.
 * Related: `read.csv()`, `read.csv2()`
 
 ```{r, eval = FALSE}
-potatoes <- read.csv(file = "data/potatoes.csv", sep = ",", header = TRUE)
+potatoes <- read.csv(file = "data/potatoes.csv",
+                     sep = ",", header = TRUE)
 ```
 
 ## `read.csv`
@@ -104,7 +114,7 @@ read_csv("a,b,c
 ## `read_csv()`
 You can use `skip = n` to skip the first n lines; or use `comment = "#"` to drop all lines that start with (e.g.) `#`:
 
-```{r}
+```{r, warning=FALSE}
 potatoes <- read_csv("data/potatoes.csv", skip = 2)
 ```
 
@@ -135,22 +145,24 @@ Other arguments to `read_csv()`:
 ## `read_delim`
 `read_delim` is the main readr function and takes two mandatory arguments, _file_ and _delim_.
 
-```{r}
-properties <- c("area", "temp", "size", "storage", "method",
-                "texture", "flavor", "moistness")
-potatoes <- read_delim("potatoes.txt", delim = "\t",
+```{r, message=FALSE}
+properties <- c("area", "temp", "size", "storage",
+                "method", "texture", "flavor",
+                "moistness")
+potatoes <- read_delim("data/potatoes.txt", delim = "\t",
                        col_names = properties)
 ```
 
 ## `readr` parser
 To figure out the type of each column `readr` reads the first 1000 rows and uses some heuristics to figure out the type of each column. You can try it out with `guess_parser()`, which returns `readr`'s best guess:
 
+## `readr` parser
+
 ```{r}
 guess_parser("2010-10-01")
 guess_parser("15:01")
 guess_parser(c("TRUE", "FALSE"))
 guess_parser(c("1", "5", "9"))
-guess_parser(c("12,352,561"))
 ```
 
 ## `readr()` col_types
@@ -158,7 +170,9 @@ guess_parser(c("12,352,561"))
 You can use `col_types` to specify which types the columns in your imported data frame should have. You can manually set the types with a string, where each character denotes the class of the column: `c`haracter, `d`ouble, `i`nteger and `l`ogical. `_` skips the column as a whole.
 
 ```{r}
-potatoes <- read_tsv("data/potatoes.txt", col_types = "cccccccc", col_names = properties)
+potatoes <- read_tsv("data/potatoes.txt", 
+                     col_types = "cccccccc",
+                     col_names = properties)
 ```
 
 ## Exercises
@@ -168,17 +182,6 @@ potatoes <- read_tsv("data/potatoes.txt", col_types = "cccccccc", col_names = pr
 ```{r, eval = FALSE}
 read_csv("a,b\n1,2,3\n4,5,6")
 read_csv("a,b,c\n1,2\n1,2,3,4")
-read_csv("a;b\n1;3")
-```
-    
-## Exercises solutions
-
-```{r, eval = FALSE}
-# Only two columns are specified in the header “a” and “b”
-read_csv("a,b\n1,2,3\n4,5,6")
-# There are only two values in row 1, so column c is set to NA
-read_csv("a,b,c\n1,2\n1,2,3,4")
-# The values are separated by “;” not “,”. Use read_csv2 instead
 read_csv("a;b\n1;3")
 ```
     
@@ -205,7 +208,7 @@ pop2 <- read_excel("data/urbanpop.xlsx", sheet = 2)
 pop3 <- read_excel("data/urbanpop.xlsx", sheet = 3)
 
 pop <- lapply(excel_sheets(path = "data/urbanpop.xlsx"),
-                   read_excel, path = "data/urbanpop.xlsx")
+              read_excel, path = "data/urbanpop.xlsx")
 
 ```
 
@@ -214,8 +217,7 @@ pop <- lapply(excel_sheets(path = "data/urbanpop.xlsx"),
 You can use `skip` to control which cells are read and `col_names` to set the column names.
 
 ```{r}
-# Import the second sheet of urbanpop.xlsx, skipping the first 21 rows
-pop <- read_excel("data/urbanpop.xlsx", sheet=2,
+pop <- read_excel(path = "data/urbanpop.xlsx", sheet=2,
                   skip=21, col_names=FALSE)
 ```
 
@@ -228,9 +230,10 @@ To import data from a database you first have to create a connection to it. You 
 ## Establish a connection
 
 ```{r}
+host <- "courses.csrrinzqubik.us-east-1.rds.amazonaws.com" 
 con <- dbConnect(RMySQL::MySQL(),
                  dbname = "tweater",
-                 host = "courses.csrrinzqubik.us-east-1.rds.amazonaws.com", 
+                 host = host, 
                  port = 3306,
                  user = "student",
                  password = "datacamp")
@@ -253,6 +256,7 @@ users <- dbReadTable(con, "users")
 users
 ```
 
+## Import data from tables
 Again, you can use lapply to import all tables:
 
 ```{r}
@@ -263,13 +267,38 @@ tables <- lapply(tableNames, dbReadTable, conn = con)
 ## Exercise
 The `tweats` table contains a column `user_id`, which refer to the users that have posted the tweat. The `comments` table contain both a `user_id` and a `tweat_id` column. Who posted the tweat on which somebody commented "awesome! thanks!" (comment 1012)? Be polite and disconnect from the database afterwards. You do this with the `dbDisconnect()` function.
 
-## Exercise solution
-The user with `user_id` 5: Oliver.
+# Importing data from the web
 
-```{r}
-dbDisconnect(con)
+## Import files directly from the web
+You can use `read_csv` to directly import csv files from the web.
+
+```{r, message=FALSE}
+url <- paste0("https://raw.githubusercontent.com/",
+"mhaber/HertieDataScience/master/",
+"slides/week5/data/potatoes.csv")
+potatoes <- read_csv(url)
 ```
 
+## Download files
+`read_excel()` does not yet support importing excel files directly from the web so you have to download the file first with `download.file()`:
+
+```{r}
+url <- paste0("https://github.com/",
+"mhaber/HertieDataScience/blob/master/",
+"slides/week5/data/urbanpop.xlsx?raw=true")
+download.file(url, "data/urbanpop.xlsx", mode = "wb")
+urbanpop <- read_excel("data/urbanpop.xlsx")
+```
+
+## `httr`
+The `httr` package provides a convenient function `GET()` to download files. The result is a response object, that provides easy access to the content-type and the actual content. You can extract the content from the request using the `content()` function
+
+```{r}
+url <- "http://www.example.com/"
+resp <- GET(url)
+content <- content(resp, as = "raw")
+head(content)
+```
 
 ## JSON
 
@@ -298,7 +327,8 @@ knitr::include_graphics("img/json.png")
 ## Reading data from JSON (with `jsonlite`)
 
 ```{r}
-url <- "http://mysafeinfo.com/api/data?list=englishmonarchs&format=json"
+url <- paste0("http://mysafeinfo.com/api/",
+"data?list=englishmonarchs&format=json")
 jsonData <- fromJSON(url)
 str(jsonData)
 ```
@@ -309,7 +339,6 @@ You can use `toJSON()` to convert R data to a JSON object. JSONs can come in min
 ```{r, eval = FALSE}
 # Mini
 {"a":1,"b":2,"c":{"x":5,"y":6}}
-
 # Pretty
 {
   "a": 1,
@@ -336,13 +365,44 @@ iris2 <- fromJSON(myJson)
 head(iris2)
 ```
 
-# Importing data from the web
+## Exercise
+1. Create an object called `json1` that contains a vector with the numbers 1 up to 6, in ascending order.
+
+2. Create an object `json2` that contains a named list with two elements: `a`, containing the numbers 1, 2 and 3 and `b`, containing the numbers 4, 5 and 6.
+
+3. Call `fromJSON()` on both `json1` and `json2`
 
 # Importing data from other statistical software
 
 ## Importing data from other statistical software
 We can use `haven()` to read data from other statistical software packages such as SAS, STATA and SPSS.
 
+* _SAS_: `read_sas()`
+* _STATA_: `read_dta()`
+* _SPSS_: `read_sav()` or `read_por()`, depending on the file type.
+
+All of these functions take the path to your local (or online) file.
+
+## `read_sas()`
+
+```{r}
+sales <- read_sas("data/sales.sas7bdat")
+str(sales)
+```
+
+## `read_dta()`
+With Stata data files, it can also happen that some of the variables you import have the labelled class. This is done to keep all the labelling information that was originally present in the `.dta`.It's advised to change these variables to factors or other standard R classes.  
+
+```{r}
+sugar <- read_dta("data/sugar.dta")
+sugar$Date <- as.Date(as_factor(sugar$Date))
+```
+
+## `read_sav()`
+
+```{r}
+personality <- read_sav("data/personality.sav")
+```
 # Importing data from other sources
 
 ## Images
@@ -365,14 +425,10 @@ We can use `haven()` to read data from other statistical software packages such 
 * seewave - [http://rug.mnhn.fr/seewave/](http://rug.mnhn.fr/seewave/)
 
 
-
-
 # Homework Exercises
 
 ## Homework Exercises
-For this week's homework exercise go to DataCamp and complete the course on _Exploratory Data Analysis_. You have to create an account on DataCamp and join the _Data Management with R_ group using the link in the email invitation that I sent a week ago.    
-
-Deadline: Sunday, October 1 before midnight.
+There will be no homework assignments this week. 
 
 ##  {.standout}
 That's it for today. Questions?    
