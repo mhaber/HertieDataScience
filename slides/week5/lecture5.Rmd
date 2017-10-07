@@ -57,7 +57,7 @@ _slides/week5/data_ and on moodle.
 * Related: `read.csv()`, `read.csv2()`
 
 ```{r, eval = FALSE}
-potatoes <- read.csv(file = "data/potatoes.csv",
+potatoes <- read.table(file = "data/potatoes.csv",
                      sep = ",", header = TRUE)
 ```
 
@@ -185,6 +185,20 @@ read_csv("a,b,c\n1,2\n1,2,3,4")
 read_csv("a;b\n1;3")
 ```
     
+## Exercises solutions
+
+```{r, eval = FALSE}
+# Only two columns are specified in the 
+# header “a” and “b”
+read_csv("a,b\n1,2,3\n4,5,6")
+# There are only two values in row 1, 
+# so column c is set to NA
+read_csv("a,b,c\n1,2\n1,2,3,4")
+# The values are separated by “;” 
+# not “,”. Use read_csv2 instead
+read_csv("a;b\n1;3")
+```
+    
 
 # Import Excel files
 
@@ -266,6 +280,13 @@ tables <- lapply(tableNames, dbReadTable, conn = con)
 
 ## Exercise
 The `tweats` table contains a column `user_id`, which refer to the users that have posted the tweat. The `comments` table contain both a `user_id` and a `tweat_id` column. Who posted the tweat on which somebody commented "awesome! thanks!" (comment 1012)? Be polite and disconnect from the database afterwards. You do this with the `dbDisconnect()` function.
+
+## Exercise solution
+The user with `user_id` 5: Oliver.
+
+```{r}
+dbDisconnect(con)
+```
 
 # Importing data from the web
 
@@ -371,6 +392,16 @@ head(iris2)
 2. Create an object `json2` that contains a named list with two elements: `a`, containing the numbers 1, 2 and 3 and `b`, containing the numbers 4, 5 and 6.
 
 3. Call `fromJSON()` on both `json1` and `json2`
+
+## Exercise solution
+
+```{r}
+json1 <- '[1, 2, 3, 4, 5, 6]'
+json2 <- '{"a": [1, 2, 3], "b": [4, 5, 6]}'
+fromJSON(json1)
+fromJSON(json2)
+```
+
 
 # Importing data from other statistical software
 
