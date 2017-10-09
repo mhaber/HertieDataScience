@@ -14,6 +14,12 @@ output:
   slidy_presentation: default
   linkcolor: "red"
 ---
+# Midterm evaluation survey
+
+## Midterm evaluation survey
+
+Please fill out the following survey so that I can improve the course if necessary: https://goo.gl/forms/cyo5svHi4DmLkDWN2
+
 # Prerequisites
 
 ## Packages
