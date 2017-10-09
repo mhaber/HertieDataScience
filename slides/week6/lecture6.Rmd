@@ -129,6 +129,34 @@ Raw data is rarely tidy and is much harder to work with as a result
     1.  Divide cases by population, and multiply by 10000.
     1.  Store back in the appropriate place.
     
+## Exercises solutions
+```{r}
+cases <- table2 %>% 
+  dplyr::filter(type == "cases") %>% 
+  dplyr::pull(count)
+country <- table2 %>% 
+  dplyr::filter(type == "cases") %>% 
+  dplyr::pull(country)
+year <- table2 %>% 
+  dplyr::filter(type == "cases") %>% 
+  dplyr::pull(year)
+population <- table2 %>% 
+  dplyr::filter(type == "population") %>% 
+  dplyr::pull(count)
+```
+
+## Exercises solutions
+```{r}
+table2Tidy <- tibble(country = country,
+       year = year,
+       rate = cases / population * 10000)
+```
+
+
+```{r, echo = FALSE}
+knitr::kable(table2Tidy)
+```
+
 # gathering and spreading
 
 ## `gather()` and `spread()` 
@@ -290,6 +318,22 @@ table4a %>%
 
 4.Using the `weather` data: Tidy the day columns `X1-X31` and save the result as `weatherTidy`. Finally, spread the measure column of weatherTidy and save the result as `weatherTidy2`.
  
+## Exercises solutions
+
+1. `gather()` and `spread()` are not perfectly symmetrical because column type information is not transferred between them (i.e. `year` column).
+
+2. The convert argument tries to convert character vectors to the appropriate type.
+
+3. The column names `1999` and `2000` are not standard and thus need to be quoted. 
+4. 
+
+```{r}
+weatherTidy <- weather %>% 
+  tidyr::gather(day, value, X1:X9, na.rm = TRUE)
+weatherTidy2 <- weatherTidy %>% 
+  tidyr::spread(measure, value)
+```
+
 # Separating and uniting
 
 ##  `separate()`
