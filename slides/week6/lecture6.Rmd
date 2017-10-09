@@ -19,54 +19,45 @@ output:
 ## Packages
 
 ```{r, message=FALSE, warning=FALSE}
-# install.packages("tidyverse")
 library(tidyverse)
+library(readr)
 ```
 
 ## Data
 
+```{r, message = FALSE, warning = FALSE}
+# base GitHub url
+url <- paste0("https://raw.githubusercontent.com/",
+              "mhaber/HertieDataScience/master/",
+              "slides/week6/data/")
+
+# link to datasets
+pew <- read_csv(paste0(url,"pew.csv"))
+billboard <- read_csv(paste0(url,"billboard.csv"))
+weather <- read_tsv(paste0(url,"weather.txt"))
+```
+
 
 ## Tidy data
 
-You can represent data in multiple ways. Each of the following datasets shows the same values of four variables *country*, *year*, *population*, and *cases*, but each dataset organises the values in a different way:
+Data come in multiple ways. Take the the following datasets: they show the same values of four variables *country*, *year*, *population*, and *cases*, but each dataset organises the values in a different way:
 
-```{r}
-table1
-table2
-table3
+## Tidy data
 
-# Spread across two tibbles
-table4a  # cases
-table4b  # population
+```{r, echo = FALSE}
+knitr::kable(table1)
 ```
 
 ## Tidy data
 
-```{r}
-table1
+```{r, echo = FALSE}
+knitr::kable(table2)
 ```
 
 ## Tidy data
 
-```{r}
-table2
-```
-
-## Tidy data
-
-```{r}
-table3
-```
-
-## Tidy data
-
-```{r}
-table4a  # cases
-```
-
-## Tidy data
-```{r}
-table4b  # population
+```{r, echo = FALSE}
+knitr::kable(table3)
 ```
 
 ## Tidy data
@@ -77,35 +68,22 @@ table4b  # population
     + Each observation forms a row
     + Each type of observational unit forms a table
 
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/tidy.png")
+```  
+
 - Any dataset that doesn't satisfy these conditions is considered 'messy'
-
-## Tidy data
-
-**Not tidy**:
-
-| Person       |  treatmentA | treatmentB |
-| ------------ | ----------- | ---------- |
-| John Smith   |             | 2          |
-| Jane Doe     | 16          | 11         |
-
-**Tidy**:
-
-| Person       |  treatment  | result     |
-| ------------ | ----------- | ---------- |
-| John Smith   | a           |            |
-| Jane Doe     | a           | 16         |
-| John Smith   | b           | 2          |
-| Jane Doe     | b           | 11         |
 
 ## Tidy data
 
 Why data should be tidy:
 
-1.  If you have a consistent data structure, it's easier to learn the tools that work with it because they have an underlying uniformity.
+1.  \alert{Consistency}: If you have a consistent data structure, it's easier to learn the tools that work with it because they have an underlying uniformity.
     
-2.  R is a vectorized programming language. Data structures in R are built from vectors and R’s operations are optimized to work with vectors. Tidy data takes advantage of both of these traits.
+2. \alert{Conformity}: R is a vectorized programming language. Data structures in R are built from vectors and R’s operations are optimized to work with vectors. Tidy data takes advantage of both of these traits.
 
-3. dplyr, ggplot2, and all the other packages in the tidyverse are designed to work with tidy data.
+3. \alert{Compatibility}: dplyr, ggplot2, and all the other packages in the tidyverse are designed to work with tidy data.
+
 
 ## Tidy data
 
@@ -124,87 +102,132 @@ Assume that in these data sets, cases refers to the number of people diagnosed w
 ```{r, out.width = "50%"}
 # Compute rate per 10,000
 table1 %>% 
-  mutate(rate = cases / population * 10000)
-
-# Compute cases per year
-table1 %>% 
-  count(year, wt = cases)
+  dplyr::mutate(rate = cases / population * 10000)
 ```
 
+## Tidy data
+```{r, out.width = "50%"}
+# Compute cases per year
+table1 %>% 
+  dplyr::count(year, wt = cases)
+```
 
 ## Exercises
 
 Raw data is rarely tidy and is much harder to work with as a result
 
-1.  Compute the `rate` for `table2`, and `table4a` + `table4b`. 
-    You will need to perform four operations:
+1.  Compute the `rate` for `table2`. You will need to perform four operations:
 
     1.  Extract the number of TB cases per country per year.
     1.  Extract the matching population per country per year.
     1.  Divide cases by population, and multiply by 10000.
     1.  Store back in the appropriate place.
     
-    Which representation is easiest to work with? Which is hardest? Why?
-
-2.  Recreate the plot showing change in cases over time using `table2`
-    instead of `table1`. What do you need to do first?
-
-## Exercises solutions
-
 # gathering and spreading
 
 ## `gather()` and `spread()` 
 
-The two most important functions in `tidyr` are `gather()` and `spread()`. `tidyr` builds on the idea of a key value pair. A key that explains what the information describes, and a value that contains the actual information.
-
-Password: 0123456789 
+The two most important functions in `tidyr` are `gather()` and `spread()`. `tidyr` builds on the idea of a key value pair. A key that explains what the information describes, and a value that contains the actual information (e.g. _Password: 0123456789_). 
 
 `gather()` makes wide tables narrower and longer; `spread()` makes long tables shorter and wider.
 
+## pew data
+
+```{r echo = FALSE}
+knitr::kable(pew[1:3,1:5])
+```
+
+* What variables are in this dataset?
+
+* How does a tidy version of this table look like?
+
+## `gather()`
+
+* Problem: Column names are not names of a variable, but _values_
+
+* Goal: Gather the non-variable volumns into a two-column key-value pair
+
+## `gather()`
+
+Three parameters:
+
+1. Set of columns that represent values, not variables
+
+2. The name of the variable whose values form the column names (\alert{key}).
+
+3. The name of the variable whose values are spread over the cells (\alert{value}).
+
+## `gather()`
+
+```{r}
+pewTidy <- pew %>% 
+  tidyr::gather(key = income, value = frequency,
+                -religion)
+```
+
+```{r echo = FALSE}
+knitr::kable(pewTidy[1:5,1:3])
+```
+
+## Billboard data
+
+```{r echo = FALSE}
+knitr::kable(billboard[1:5,1:4])
+```
+
+```{r echo = FALSE}
+knitr::kable(billboard[1:5,5:10])
+```
+
+* What are the variables here?
+
+## Tidying the Billboard data 
+
+To tidy this dataset, we first `gather` together all the `wk` columns. The column names give the week and the values are the ranks:
+
+```{r}
+billboardTidy <- billboard %>% 
+  tidyr::gather(key = week, value = rank,
+                wk1:wk76, na.rm = TRUE)
+```
+
+## Tidying the Billboard data 
+
+```{r echo = FALSE}
+knitr::kable(billboardTidy[1:4,1:4])
+knitr::kable(billboardTidy[1:4,5:7])
+```
+
+Are we done?
+
+## data cleaning with `dplyr()`
+
+Let's turn the week into a numeric variable and create a proper date column
+
+```{r}
+billboardTidy2 <- billboardTidy %>%
+  dplyr::mutate(week = readr::parse_number(week),
+                date = as.Date(date.entered) + 7 * 
+                  (week - 1)) %>%
+  dplyr::select(-date.entered) %>% 
+  dplyr::arrange(artist, track, week)
+```
+
+## data cleaning with `dplyr()`
+
+```{r echo = FALSE}
+knitr::kable(billboardTidy2[1:4,1:4])
+knitr::kable(billboardTidy2[1:4,5:7])
+```
+
 ##`spread()`
 
-`spread()` turns a pair of key:value columns into a set of tidy columns. 
+Spreading is the opposite of gathering. You use it when an observation is scattered across multiple rows. `spread()` turns a pair of key:value columns into a set of tidy columns. 
 
+For example, take `table2`: an observation is a country in a year, but each observation is spread across two rows.
 
-## `gather()`
-A common problem is a dataset where some of the column names are not names of variables, but _values_ of a variable. Take `table4a`: the column names `1999` and `2000` represent values of the `year` variable, and each row represents two observations, not one.
-
-```{r}
-table4a
-```
-
-To tidy a dataset like this, we need to __gather__ those columns into a new pair of variables. To describe that operation we need three parameters:
-
-* The set of columns that represent values, not variables. In this example, those are the columns `1999` and `2000`.
-
-* The name of the variable whose values form the column names. I call that the `key`, and here it is `year`.
-
-* The name of the variable whose values are spread over the cells. I call that `value`, and here it's the number of `cases`.
-
-## `gather()`
-
-```{r}
-table4a %>% 
-  gather(`1999`, `2000`, key = "year", value = "cases")
-```
-
-The columns to gather are specified with `dplyr::select()` style notation. Here there are only two columns, so we list them individually. Note that "1999" and "2000" are non-syntactic names (because they don't start with a letter) so we have to surround them in backticks. 
-
-## `gather()`
-
-We can use `gather()` to tidy `table4b` in a similar fashion. The only difference is the variable stored in the cell values:
-
-```{r}
-table4b %>% 
-  gather(`1999`, `2000`, key = "year", value = "population")
-```
-
-## `spread()`
-
-Spreading is the opposite of gathering. You use it when an observation is scattered across multiple rows. For example, take `table2`: an observation is a country in a year, but each observation is spread across two rows.
-
-```{r}
-table2
+```{r, echo = FALSE}
+knitr::kable(table2[1:7,])
 ```
 
 ## `spread()`
@@ -216,104 +239,166 @@ To tidy this up, we first analyse the representation in similar way to `gather()
 * The column that contains values forms multiple variables, the `value`
   column. Here it's `count`.
 
-Once we've figured that out, we can use `spread()`, as shown programmatically below, and visually in Figure \@ref(fig:tidy-spread).
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/spread.png")
+```  
 
-```{r}
-spread(table2, key = type, value = count)
+## `spread()`
+
+```{r, eval = FALSE}
+table2 %>% 
+  tidyr::spread(key = type, value = count)
+```
+
+```{r, echo = FALSE}
+table2Tidy <- table2 %>% 
+  tidyr::spread(key = type, value = count)
+knitr::kable(table2Tidy)
 ```
 
 ## Exercises
 
-1.  Why does this code fail?
-
-    ```{r, error = TRUE}
-    table4a %>% 
-      gather(1999, 2000, key = "year", value = "cases")
-    ```
-
-2.  Tidy the simple tibble below. Do you need to spread or gather it?
-
-
-    ```{r}
-    preg <- tribble(
-      ~pregnant, ~male, ~female,
-      "yes",     NA,    10,
-      "no",      20,    12
+1. Are `gather()` and `spread()` perfectly symmetrical? Carefully consider the following example:
+    
+```{r, eval = FALSE}
+stocks <- tibble(
+  year   = c(2015, 2015, 2016, 2016),
+  half  = c(   1,    2,     1,    2),
+  return = c(1.88, 0.59, 0.92, 0.17)
     )
-    ```
+stocks %>% 
+  tidyr::spread(year, return) %>% 
+  tidyr::gather("year", "return", `2015`:`2016`)
+```
 
-3. Read in the `weather` data from GitHub:
- Tidy the day columns X1-X31 and save the result as weather2.
- 
-4. Spread the measure column of weather2.
- 
-## Exercises solutions
+2. Both `spread()` and `gather()` have a `convert` argument. What does it do?
 
+## Exercises
+
+3.  Why does this code fail?
+
+```{r, eval = FALSE}
+table4a %>% 
+  tidyr::gather(1999, 2000, key = "year", value = "cases")
+```
+
+4.Using the `weather` data: Tidy the day columns `X1-X31` and save the result as `weatherTidy`. Finally, spread the measure column of weatherTidy and save the result as `weatherTidy2`.
+ 
 # Separating and uniting
 
 ##  `separate()`
 
 `separate()` pulls apart one column into multiple columns, by splitting wherever a separator character appears. Take `table3`:
 
-```{r}
-table3
+```{r, echo = FALSE}
+knitr::kable(table3)
 ```
 
-The `rate` column contains both `cases` and `population` variables, and we need to split it into two variables. `separate()` takes the name of the column to separate, and the names of the columns to separate into, as shown in Figure \@ref(fig:tidy-separate) and the code below.
+##  `separate()`
 
-```{r}
+The `rate` column contains both `cases` and `population` variables, and we need to split it into two variables. `separate()` takes the name of the column to separate, and the names of the columns to separate into.
+
+```{r, out.width = "250px", echo = F, fig.align='center'}
+knitr::include_graphics("img/separate.png")
+```  
+
+##  `separate()`
+
+```{r, eval = FALSE}
 table3 %>% 
-  separate(rate, into = c("cases", "population"))
+  tidyr::separate(rate, into = c("cases", "population"))
+```
+
+```{r, echo = FALSE}
+table3Tidy <- table3 %>% 
+  tidyr::separate(rate, into = c("cases", "population"))
+knitr::kable(table3Tidy)
 ```
 
 ## `separate()`
 
-By default, `separate()` will split values wherever it sees a non-alphanumeric character (i.e. a character that isn't a number or letter). For example, in the code above, `separate()` split the values of `rate` at the forward slash characters. If you wish to use a specific character to separate a column, you can pass the character to the `sep` argument of `separate()`. For example, we could rewrite the code above as:
+By default, `separate()` will split values at non-alphanumeric characters (!number, !letter). If you wish to use a specific character to separate a column, you can pass the character to the `sep` argument of `separate()`.
+
+## `separate()`
 
 ```{r eval = FALSE}
 table3 %>% 
-  separate(rate, into = c("cases", "population"), sep = "/")
+  tidyr::separate(rate, into = c("cases", "population"),
+                  sep = "/")
+```
+
+```{r, echo = FALSE}
+table3Tidy <- table3 %>% 
+  tidyr::separate(rate, into = c("cases", "population"),
+                  sep = "/")
+knitr::kable(table3Tidy)
 ```
 
 ## `separate()`
 
-You can also pass a vector of integers to `sep`. `separate()` will interpret the integers as positions to split at. Positive values start at 1 on the far-left of the strings; negative value start at -1 on the far-right of the strings. When using integers to separate strings, the length of `sep` should be one less than the number of names in `into`. 
+You can also pass a vector of integers to `sep`. `separate()` will interpret the integers as positions to split at. Positive values start at 1 on the far-left of the strings; negative value start at -1 on the far-right of the strings.
 
 You can use this arrangement to separate the last two digits of each year. This make this data less tidy, but is useful in other cases, as you'll see in a little bit.
 
-```{r}
+## `separate()`
+
+```{r, eval = FALSE}
 table3 %>% 
-  separate(year, into = c("century", "year"), sep = 2)
+  tidyr::separate(year, into = c("century", "year"),
+                  sep = 2)
+```
+
+```{r, echo = FALSE}
+table3Tidy <- table3 %>% 
+  tidyr::separate(year, into = c("century", "year"),
+                  sep = 2)
+knitr::kable(table3Tidy)
 ```
 
 ## `unite()`
 
 `unite()` is the inverse of `separate()`: it combines multiple columns into a single column. You'll need it much less frequently than `separate()`, but it's still a useful tool to have in your back pocket.
 
-We can use `unite()` to rejoin the *century* and *year* columns that we created in the last example. That data is saved as `tidyr::table5`. `unite()` takes a data frame, the name of the new variable to create, and a set of columns to combine, again specified in `dplyr::select()` style:
+We can use `unite()` to rejoin the *century* and *year* columns in `table5`. `unite()` takes a data frame, the name of the new variable to create, and a set of columns to combine.
 
-```{r}
+## `unite()`
+
+```{r, eval = FALSE}
 table5 %>% 
-  unite(new, century, year)
+  tidyr::unite(new, century, year)
+```
+
+```{r, echo = FALSE}
+table5Tidy <- table5 %>% 
+  tidyr::unite(new, century, year)
+knitr::kable(table5Tidy)
 ```
 
 ## `unite()`
 
-In this case we also need to use the `sep` argument. The default will place an underscore (`_`) between the values from different columns. Here we don't want any separator so we use `""`:
+By default, `unite()` will place an underscore (`_`) between the values from different columns. If we don't want any separator we use `""`:
 
-```{r}
+```{r, eval = FALSE}
 table5 %>% 
-  unite(new, century, year, sep = "")
+  tidyr::unite(new, century, year, sep = "")
+```
+
+```{r, echo = FALSE}
+table5Tidy <- table5 %>% 
+  tidyr::unite(new, century, year, sep = "")
+knitr::kable(table5Tidy)
 ```
 
 # Missing values
 
 ## Missing values
 
-Changing the representation of a dataset brings up an important subtlety of missing values. Surprisingly, a value can be missing in one of two possible ways:
+> "An explicit missing value is the presence of an absence; an implicit missing value is the absence of a presence."
 
-* __Explicitly__, i.e. flagged with `NA`.
-* __Implicitly__, i.e. simply not present in the data.
+A value can be missing in one of two possible ways:
+
+* _Explicitly_ i.e. flagged with `NA`.
+* _Implicitly_, i.e. simply not present in the data.
 
 Let's illustrate this idea with a very simple data set:
 
@@ -325,41 +410,65 @@ stocks <- tibble(
 )
 ```
 
+## Missing values
+
 There are two missing values in this dataset:
 
-* The return for the fourth quarter of 2015 is explicitly missing, because
-  the cell where its value should be instead contains `NA`.
+* The return for the 4th quarter of 2015 is explicitly missing (`NA`).
   
-* The return for the first quarter of 2016 is implicitly missing, because it
-  simply does not appear in the dataset.
+* The return for the 1st quarter of 2016 is implicitly missing.
   
-One way to think about the difference is with this Zen-like koan: An explicit missing value is the presence of an absence; an implicit missing value is the absence of a presence.
+We can make the implicit missing value explicit by putting years in the columns:
 
-The way that a dataset is represented can make implicit values explicit. For example, we can make the implicit missing value explicit by putting years in the columns:
+## Missing values
 
-```{r}
+```{r, eval = FALSE}
 stocks %>% 
-  spread(year, return)
+  tidyr::spread(year, return)
 ```
 
-Because these explicit missing values may not be important in other representations of the data, you can set `na.rm = TRUE` in `gather()` to turn explicit missing values implicit:
-
-```{r}
-stocks %>% 
-  spread(year, return) %>% 
-  gather(year, return, `2015`:`2016`, na.rm = TRUE)
+```{r, echo = FALSE}
+stocksTidy <- stocks %>% 
+  tidyr::spread(year, return)
+knitr::kable(stocksTidy)
 ```
 
-Another important tool for making missing values explicit in tidy data is `complete()`:
+## Remove missing values
 
-```{r}
+You can also set `na.rm = TRUE` in `gather()` to turn explicit missing values implicit:
+
+```{r, eval = FALSE}
 stocks %>% 
-  complete(year, qtr)
+  tidyr::spread(year, return) %>% 
+  tidyr::gather(year, return, `2015`:`2016`, na.rm = TRUE)
 ```
 
-`complete()` takes a set of columns, and finds all unique combinations. It then ensures the original dataset contains all those values, filling in explicit `NA`s where necessary.
+```{r, echo = FALSE}
+stocksTidy <- stocks %>% 
+  tidyr::spread(year, return) %>% 
+  tidyr::gather(year, return, `2015`:`2016`, na.rm = TRUE)
+knitr::kable(stocksTidy)
+```
 
-There's one other important tool that you should know for working with missing values. Sometimes when a data source has primarily been used for data entry, missing values indicate that the previous value should be carried forward:
+## `complete()`
+You can also use `complete()` for making missing values explicit. `complete()` takes a set of columns, and finds all unique combinations; filling in explicit `NA`s where necessary.
+
+## `complete()`
+
+```{r, eval = FALSE}
+stocks %>% 
+  tidyr::complete(year, qtr)
+```
+
+```{r, echo = FALSE}
+stocksTidy <- stocks %>% 
+  tidyr::complete(year, qtr)
+knitr::kable(stocksTidy)
+```
+
+## `fill()`
+
+Finally, you can fill in missing values with `fill()`. It takes a set of columns where you want missing values to be replaced by the most recent non-missing value (sometimes called last observation carried forward).
 
 ```{r}
 treatment <- tribble(
@@ -371,20 +480,26 @@ treatment <- tribble(
 )
 ```
 
-You can fill in these missing values with `fill()`. It takes a set of columns where you want missing values to be replaced by the most recent non-missing value (sometimes called last observation carried forward).
+## `fill()`
 
-```{r}
+```{r, eval = FALSE}
 treatment %>% 
-  fill(person)
+  tidyr::fill(person)
 ```
 
+```{r, echo = FALSE}
+treatmentTidy <- treatment %>% 
+  tidyr::fill(person)
+knitr::kable(treatmentTidy)
+```
 
+  
 # Homework Exercises
 
 ## Homework Exercises
-For this week's homework exersises go to Moodle and answer the Quiz posted in the Tidy Data section. You will be asked a number of questions randomly selected from a question pool. If you work in pairs, then you might get two different sets of questions. 
+For this week's homework exersises go to Moodle and answer the Quiz posted in the Tidy Data section.
 
-Deadline: Sunday, September 24 before midnight.
+Deadline: Sunday, October 15 before midnight.
 
 
 ##  {.standout}
