@@ -371,17 +371,20 @@ An inner join keeps observations that appear in both tables. An __outer join__ k
 * A __right join__ keeps all observations in `y`.
 * A __full join__ keeps all observations in `x` and `y`.
 
+The most commonly used join is the left join: you use this whenever you look up additional data from another table, because it preserves the original observations even when there isn't a match.
+
+## Outer joins
+
 ```{r, echo = FALSE, out.width = NULL}
 knitr::include_graphics("img/join-outer.png")
 ```
 
-The most commonly used join is the left join: you use this whenever you look up additional data from another table, because it preserves the original observations even when there isn't a match.
 
 # SQL
 
 ## SQL
 
-\alert{S}tructure \alert{Q}uery \alert{L}anguage is a language for interacting with databases. SQL is over 40 years old, and is used by pretty much every database in existence.
+\alert{S}tructured \alert{Q}uery \alert{L}anguage is a language for interacting with databases. SQL is over 40 years old, and is used by pretty much every database in existence.
 
 - A query is a request for data from a database table (or combination of tables)
 
@@ -631,19 +634,21 @@ HAVING COUNT(title) > 10
 
 ##  Joins
 
-dplyr                        
------------------------------|
-`inner_join(x, y, by = "z")` |
-`left_join(x, y, by = "z")`  |
-`right_join(x, y, by = "z")` | 
-`full_join(x, y, by = "z")`  | 
 
-SQL
-----------------------------------------------|
- `SELECT * FROM x INNER JOIN y USING (z)`     |
-`SELECT * FROM x LEFT OUTER JOIN y USING (z)` |
-`SELECT * FROM x RIGHT OUTER JOIN y USING (z)`|
-`SELECT * FROM x FULL OUTER JOIN y USING (z)` |
+| dplyr                        |
+|------------------------------|
+| `inner_join(x, y, by = "z")` |
+| `left_join(x, y, by = "z")`  |
+| `right_join(x, y, by = "z")` |
+| `full_join(x, y, by = "z")`  |
+
+| SQL                                      |
+|------------------------------------------|
+| `SELECT * FROM x INNER JOIN y USING (z)` |
+| `SELECT * FROM x LEFT JOIN y USING (z)`  |
+| `SELECT * FROM x RIGHT JOIN y USING (z)` |
+| `SELECT * FROM x FULL JOIN y USING (z)`  |
+
 
 ## `UNION`, `INTERSECT`, `EXCEPT`
 
@@ -842,13 +847,118 @@ Get together in groups of two or three and
     averages as avg_budget and avg_gross respectively
     + Disconnect from your database
     
+## Group exercise solution
+Set up the database
+```{r}
+con <- dbConnect(SQLite(), dbname = "data/films.sqlite")
+```
+
+Write tables into the database
+```{r}
+dbWriteTable(con, "films", films)
+dbWriteTable(con, "people", people)
+dbWriteTable(con, "reviews", reviews)
+dbWriteTable(con, "roles", roles)
+dbListTables(con)
+```
+
+## Group exercise solution
+
+title, release year and country for every film
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT title, release_year, country
+                         FROM films")
+```
+
+different type of film roles
+```{r}
+DBI::dbGetQuery(con, "SELECT DISTINCT role
+                FROM roles")
+```
+
+## Group exercise solution
+
+number of unique languages
+```{r}
+DBI::dbGetQuery(con, "SELECT COUNT(DISTINCT language)
+                FROM films")
+```
+
+
+number of films released before 2000
+```{r}
+DBI::dbGetQuery(con, "SELECT COUNT(id)
+                FROM films
+                WHERE release_year < 2000")
+```
+
+## Group exercise solution
+name and birth date of the person born on November 11th, 1974
+```{r}
+DBI::dbGetQuery(con, "SELECT name, birthdate
+                FROM people
+                WHERE birthdate = '1974-11-11'")
+```
+
+Spanish language films released after 2000, but before 2010
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT *
+                FROM films
+                WHERE language = 'Spanish' AND release_year > 2000 
+                AND release_year < 2010")
+```
+
+## Group exercise solution
+
+people who are still alive
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT name
+                           FROM people
+                           WHERE deathdate IS NULL")
+```
+
+amount grossed by the best performing film between 2000 and 2012
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT MAX(gross)
+                FROM films
+                WHERE release_year BETWEEN 2000 AND 2012")
+```
+
+## Group exercise solution
+average duration in hours for all films
+```{r}
+DBI::dbGetQuery(con, "SELECT AVG(duration / 60.0) 
+                AS avg_duration_hours
+                FROM films")
+```
+
+
+IMDB score and count of film reviews grouped by IMDB score
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT imdb_score, COUNT(id)
+                FROM reviews
+                GROUP BY imdb_score")
+```
+
+## Group exercise solution
+final task
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT country, 
+                AVG(budget) AS avg_budget, 
+                AVG(gross) AS avg_gross
+                FROM films
+                GROUP BY country
+                HAVING COUNT(id) > 10
+                ORDER BY country
+                LIMIT 5")
+```
 
 # Homework Exercises
 
 ## Homework Exercises
 For this week's homework exersises go to Moodle and answer the Quiz posted in the Relational Data section.
 
-Deadline: Sunday, October 30 before midnight.
+Deadline: Sunday, October 29 before midnight.
 
 
 ##  {.standout}
