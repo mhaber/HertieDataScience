@@ -14,11 +14,72 @@ output:
   slidy_presentation: default
   linkcolor: "red"
 ---
+
 # Last weeks Homework
 
 ## Last weeks Homework
 
+```{r, message=FALSE, warning=FALSE}
+library(readxl)
+library(tidyverse)
+iiag <- read_xls("data/iiag.xls", sheet = 5, skip = 5) 
+iiag %>% 
+  gather(variable,value,-V1) %>% 
+  spread(V1, value) %>%
+  mutate(variable = readr::parse_number(variable)) %>% 
+  arrange(variable) %>% 
+  select(-variable) %>%
+  fill(Indicator) %>% 
+  select(Indicator, Year, everything()) %>% 
+  gather(country, value, Algeria:Zimbabwe) %>% 
+  select(country, Year, Indicator, value) %>%
+  arrange(country, Year, Indicator) %>% 
+  filter(row_number() == 1518) %>% 
+  select(value)
+```
 
+## Last weeks Homework
+
+Which of the following is not a symptom of messy data?
+
+c. Multiple values are stored in one column
+
+Which of the following is a principle of tidy data?
+
+a. Each observation forms a row, each variable forms a column, and each type of observational unit forms a table
+
+b. Each value belongs to a variable and an observation
+
+c. A dataset is a collection of values
+
+
+# Final project
+
+## Final project
+
+Your goal is to apply your data science skills to process a large dataset and analyze it using your own ideas. You can select a dataset from a number of interesting datasets (e.g. the Armed Conflict Location & Event Data) or suggest your own. Specifically, you will have to
+
+1. Prepare your data set for analysis \alert{25%}
+
+    + Load the data and perform the necessary data cleaning and manipulation steps
+    
+2. Perform exploratory data analysis and visualize interesting descriptive facts about your data \alert{25%}
+
+3. Develop and specify ideas for analyzing your data and run the appropriate statistical model \alert{25%} 
+
+    + e.g. regression analysis, machine learning, etc.
+
+4. Present and discuss your results \alert{25%}
+
+    + Appropriate graphical presentations of results (watch out for the quality of graphs)
+    + BONUS: Create an interactive interface to your data (e.g. shiny, plotly, etc.)
+    
+## Final project
+
+- You will need to set up your own public GitHub repository for your project
+- ~8 page document written in R Markdown (week 10)
+- Team-work is encouraged 
+- Due 15 December
 
 # Prerequisites
 
@@ -27,6 +88,8 @@ output:
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(dbplyr) # install.packages("dbplyr")
+library(DBI)
+library(RSQLite) # install.packages("RSQLite")
 library(nycflights13)
 library(readr)
 ```
@@ -34,14 +97,22 @@ library(readr)
 ## Data
 
 ```{r, message = FALSE, warning = FALSE}
-films <- read_csv("data/films.csv")
-people <- read_csv("data/people.csv")
-reviews <- read_csv("data/reviews.csv")
-roles <- read_csv("data/roles.csv")
+url <- paste0("https://raw.githubusercontent.com/mhaber/HertieDataScience/",
+              "master/slides/week7/data/")
+films <- read_csv(paste0(url, "films.csv"))
+people <- read_csv(paste0(url, "people.csv"), col_types = "iccc")
+reviews <- read_csv(paste0(url, "reviews.csv"))
+roles <- read_csv(paste0(url, "roles.csv"))
+#flights
 ```
 
+# Relational data
 
-# Terminology
+## Relational data
+
+Data analysis rarely involves only a single table, but many tables of data, and you must combine them to answer the questions that you’re interested in. Collectively, multiple tables of data are called \alert{relational data} because it is the relations that are important.
+
+The most common place to find relational data is in a relational database management system (or RDBMS).
 
 ## Databases
 
@@ -207,6 +278,7 @@ Relational algebra has two semantics:
 Rule of thumb:
 
 - Every commercial database will assume bag semantics
+
 ## Union
 
 ```{r, echo = FALSE, out.width = NULL}
@@ -272,7 +344,6 @@ knitr::include_graphics("img/crossproduct.png")
 ```
 
 ## Join
-
 
 A join is a way of connecting each row in `x` to zero, one, or more rows in `y`. The following diagram shows each potential match as an intersection of a pair of lines.
 
@@ -552,42 +623,19 @@ GROUP BY release_year
 HAVING COUNT(title) > 10
 ```
 
-## `INNER JOIN`
+##  Joins
 
-`INNER JOIN` matches pairs of observations whenever their keys are equal.
+dplyr                        | SQL
+-----------------------------|-------------------------------------------
+`inner_join(x, y, by = "z")` | `SELECT * FROM x INNER JOIN y USING (z)`
+`left_join(x, y, by = "z")`  | `SELECT * FROM x LEFT OUTER JOIN y USING (z)`
+`right_join(x, y, by = "z")` | `SELECT * FROM x RIGHT OUTER JOIN y USING (z)`
+`full_join(x, y, by = "z")`  | `SELECT * FROM x FULL OUTER JOIN y USING (z)`
 
-```{r,eval = FALSE}
-SELECT *
-FROM left_table
-INNER JOIN right_table
-ON left_table.id = right_table.id
-```
-
-## `LEFT JOIN`
-
-The `LEFT JOIN` keyword returns all records from the left table (table1), and the matched records from the right table (table2). The result is `NULL` from the right side, if there is no match.
-
-```{r,eval = FALSE}
-SELECT p1.country, prime_minister, president
-FROM prime_ministers AS p1
-LEFT JOIN presidents AS p2
-ON p1.country = p2.country
-```
-
-## `FULL JOIN`
-
-The `FULL JOIN` keyword return all records when there is a match in either left (table1) or right (table2) table records.
-
-```{r, eval = FALSE}
-SELECT p1.country AS pm_co, 
-       p2.country AS pres_co,
-       prime_minister, president
-FROM prime_ministers AS p1
-FULL JOIN presidents AS p2
-ON p1.country = p2.country
-```
 
 ## `UNION`
+
+The `UNION` operator is used to combine the results of two or more `SELECT` statements without returning any duplicate rows.
 
 ```{r, eval = FALSE}
 SELECT  prime_minister AS leader, country
@@ -598,26 +646,12 @@ FROM monarchs
 ORDER BY country
 ```
 
-## `INTERSECT`
+The `INTERSECT` operator is used to combine two `SELECT` statements but returns rows only from the first `SELECT` statement that are identical to a row in the second `SELECT` statement.
 
-```{r, eval = FALSE}
-SELECT  country, prime_minister AS leader
-FROM prime_ministers
-INTERSECT
-SELECT country, president
-FROM presidents
-```
-
-## `EXCEPT`
-
-```{r, eval = FALSE}
-SELECT monarch, country
-FROM monarchs
-EXCEPT
-SELECT prime_ministers, country
-FROM prime_ministers
-```
+The `EXCEPT` operator is used to combine two `SELECT` statements and returns rows from the first `SELECT` statement that are not returned by the second `SELECT` statement.
+ 
 ## User-defined function support
+Most SQL database also allow user-defined functions,routines that perform an action, such as a complex calculation, and return the result of that action as a value.
 
 - PostgreSQL
 
@@ -688,8 +722,7 @@ You need to install a specific backend for the database that you want to connect
 ## Connecting to a database file
 
 ```{r}
-con <- DBI::dbConnect(RSQLite::SQLite(), dbname='films.sqlite')
-dbListTables(con)
+con <- DBI::dbConnect(RSQLite::SQLite(), path = ":memory:")
 ```
 
 
@@ -706,12 +739,191 @@ con <- DBI::dbConnect(RMySQL::MySQL(),
 ## Creating a database
 
 ```{r}
-con <- dbConnect(SQLite(), dbname = "films.sqlite")
+con <- DBI::dbConnect(RSQLite::SQLite(), path = ":memory:")
+dbWriteTable(con, "flights", nycflights13::flights)
+dbListTables(con)
+flights_db <- tbl(con, "flights")
+```
+
+
+## Generating queries
+
+You can pass SQL queries with `dbGetQuery()` or `dbExecute()`.
+
+```{r}
+results <- DBI::dbGetQuery(con,
+                           "SELECT arr_time AS arrivalTime
+                           FROM flights
+                           WHERE carrier = 'UA'")
+```
+
+
+## Generating queries
+
+Most of the time you don’t need to know anything about SQL, and you can continue to use the `dplyr` verbs that you’re already familiar with:
+
+```{r}
+tailnum_delay_db <- flights_db %>% 
+  dplyr::group_by(tailnum) %>%
+  dplyr::summarize(
+    delay = mean(arr_delay),
+    n = n()
+  ) %>% 
+  dplyr::arrange(desc(delay)) %>%
+  dplyr::filter(n > 100)
+```
+
+Your R code is translated into SQL and executed in the database, not in R. `dplyr` tries to be as lazy as possible:
+
+* It never pulls data into R unless you explicitly ask for it.
+* It collects together everything you want to do and then sends it to the database in one step.
+
+## Generating queries
+
+You can see the SQL `dplyr` generating with `show_query()`:
+
+```{r}
+tailnum_delay_db %>% show_query()
+```
+
+## Pull data from a database
+
+Once you’ve figured it out what data you need from the database, use `collect()` to pull all the data down into a local tibble.
+
+```{r}
+tailnum_delay <- tailnum_delay_db %>% collect()
+```
+
+`collect()` requires that database does some work, so it may take a long time to complete.
+
+# Group Exercise
+
+## Group exercise
+In today's exercise you'll be working with a database containing information on almost 5000 films.
+Get together in groups of two or three and 
+
+1. set up our own (SQLite) database
+2. write the four objects `films`, `people`, `review`, `role` as tables into your database and use `dbListTables()` to make sure you did it correctly
+
+## Group exercise
+3. complete the following tasks using either SQL or `dplyr`'s language:
+
+    + Get the title, release year and country for every film
+    + Get all the different type of film roles
+    + Count the number of unique languages
+    + Get the number of films released before 2000
+    + Get the name and birth date of the person born on November 11th, 1974. Remember to use ISO date format ('1974-11-11')
+    + Get all information for Spanish language films released after 2000, but before 2010
+    + Get the names of people who are still alive
+    + Get the amount grossed by the best performing film between 2000 and 2012
+    + Get the average duration in hours for all films, aliased as `avg_duration_hours`
+    + Get the IMDB score and count of film reviews grouped by IMDB score
+    + Get the country, average budget, and average gross take of countries that have made more than 10 films.
+    Order the result by country name, and limit the number of results displayed to 5. You should alias the
+    averages as avg_budget and avg_gross respectively
+    + Disconnect from your database
+
+## Group exercise solution
+Set up the database
+```{r}
+con <- dbConnect(SQLite(), dbname = "data/films.sqlite")
+```
+
+Write tables into the database
+```{r}
 dbWriteTable(con, "films", films)
 dbWriteTable(con, "people", people)
 dbWriteTable(con, "reviews", reviews)
 dbWriteTable(con, "roles", roles)
 dbListTables(con)
+```
+
+## Group exercise solution
+
+title, release year and country for every film
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT title, release_year, country
+                         FROM films")
+```
+
+different type of film roles
+```{r}
+DBI::dbGetQuery(con, "SELECT DISTINCT role
+                FROM roles")
+```
+
+number of unique languages
+```{r}
+DBI::dbGetQuery(con, "SELECT COUNT(DISTINCT language)
+                FROM films")
+```
+
+
+## Group exercise solution
+
+number of films released before 2000
+```{r}
+DBI::dbGetQuery(con, "SELECT COUNT(id)
+                FROM films
+                WHERE release_year < 2000")
+```
+
+name and birth date of the person born on November 11th, 1974
+```{r}
+DBI::dbGetQuery(con, "SELECT name, birthdate
+                FROM people
+                WHERE birthdate = '1974-11-11'")
+```
+
+Spanish language films released after 2000, but before 2010
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT *
+                FROM films
+                WHERE language = 'Spanish' AND release_year > 2000 
+                AND release_year < 2010")
+```
+
+## Group exercise solution
+
+people who are still alive
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT name
+                           FROM people
+                           WHERE deathdate IS NULL")
+```
+
+amount grossed by the best performing film between 2000 and 2012
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT MAX(gross)
+                FROM films
+                WHERE release_year BETWEEN 2000 AND 2012")
+```
+
+average duration in hours for all films
+```{r}
+DBI::dbGetQuery(con, "SELECT AVG(duration / 60.0) AS avg_duration_hours
+                FROM films")
+```
+
+## Group exercise solution
+
+IMDB score and count of film reviews grouped by IMDB score
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT imdb_score, COUNT(id)
+                FROM reviews
+                GROUP BY imdb_score")
+```
+
+## Group exercise solution
+final task
+```{r, eval = FALSE}
+DBI::dbGetQuery(con, "SELECT country, AVG(budget) AS avg_budget, 
+                        AVG(gross) AS avg_gross
+                FROM films
+                GROUP BY country
+                HAVING COUNT(id) > 10
+                ORDER BY country
+                LIMIT 5")
 ```
 
 # Homework Exercises
