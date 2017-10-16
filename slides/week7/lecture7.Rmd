@@ -22,7 +22,11 @@ output:
 ```{r, message=FALSE, warning=FALSE}
 library(readxl)
 library(tidyverse)
-iiag <- read_xls("data/iiag.xls", sheet = 5, skip = 5) 
+iiag <- read_excel("data/iiag.xls", sheet = 5, skip = 5) 
+```
+## Last weeks Homework
+
+```{r, message=FALSE, warning=FALSE}
 iiag %>% 
   gather(variable,value,-V1) %>% 
   spread(V1, value) %>%
@@ -32,7 +36,6 @@ iiag %>%
   fill(Indicator) %>% 
   select(Indicator, Year, everything()) %>% 
   gather(country, value, Algeria:Zimbabwe) %>% 
-  select(country, Year, Indicator, value) %>%
   arrange(country, Year, Indicator) %>% 
   filter(row_number() == 1518) %>% 
   select(value)
@@ -42,15 +45,15 @@ iiag %>%
 
 Which of the following is not a symptom of messy data?
 
-c. Multiple values are stored in one column
+* Multiple values are stored in one column
 
 Which of the following is a principle of tidy data?
 
-a. Each observation forms a row, each variable forms a column, and each type of observational unit forms a table
+* Each observation forms a row, each variable forms a column, and each type of observational unit forms a table
 
-b. Each value belongs to a variable and an observation
+* Each value belongs to a variable and an observation
 
-c. A dataset is a collection of values
+* A dataset is a collection of values
 
 
 # Final project
@@ -59,17 +62,19 @@ c. A dataset is a collection of values
 
 Your goal is to apply your data science skills to process a large dataset and analyze it using your own ideas. You can select a dataset from a number of interesting datasets (e.g. the Armed Conflict Location & Event Data) or suggest your own. Specifically, you will have to
 
-1. Prepare your data set for analysis \alert{25%}
+1. Prepare your data set for analysis (25%)
 
     + Load the data and perform the necessary data cleaning and manipulation steps
     
-2. Perform exploratory data analysis and visualize interesting descriptive facts about your data \alert{25%}
+2. Perform exploratory data analysis and visualize interesting descriptive facts about your data (25%)
 
-3. Develop and specify ideas for analyzing your data and run the appropriate statistical model \alert{25%} 
+## Final project
+
+3. Develop and specify ideas for analyzing your data and run the appropriate statistical model (25%) 
 
     + e.g. regression analysis, machine learning, etc.
 
-4. Present and discuss your results \alert{25%}
+4. Present and discuss your results (25%)
 
     + Appropriate graphical presentations of results (watch out for the quality of graphs)
     + BONUS: Create an interactive interface to your data (e.g. shiny, plotly, etc.)
@@ -97,10 +102,12 @@ library(readr)
 ## Data
 
 ```{r, message = FALSE, warning = FALSE}
-url <- paste0("https://raw.githubusercontent.com/mhaber/HertieDataScience/",
+url <- paste0("https://raw.githubusercontent.com/mhaber/",
+              "HertieDataScience/",
               "master/slides/week7/data/")
 films <- read_csv(paste0(url, "films.csv"))
-people <- read_csv(paste0(url, "people.csv"), col_types = "iccc")
+people <- read_csv(paste0(url, "people.csv"),
+                   col_types = "iccc")
 reviews <- read_csv(paste0(url, "reviews.csv"))
 roles <- read_csv(paste0(url, "roles.csv"))
 #flights
@@ -120,8 +127,7 @@ What is a database:
 
 > A collection of information organized to afford efficient retrievel.
 
-> "When people use the word database, fundamentally what they are saying is that the data should be self-describing and it should have a schema."
-                                        (Jim Gray)
+> "When people use the word database, fundamentally what they are saying is that the data should be self-describing and it should have a schema." (Jim Gray)
 
 ## Databases
 
@@ -172,7 +178,7 @@ knitr::include_graphics("img/networkDB.png")
 knitr::include_graphics("img/hierachicalDB.png")
 ```
 
-- hierachical order of data in terms of segments (e.g. IBM's IMS system that still exists)
+- hierachical order of data in terms of segments
 
     + works great if you want to find all orders for a particular customer
     + but what if you want to find all customers who ordered a Nail?
@@ -201,6 +207,8 @@ Relational databases (Edgar Codd 1970)
 * Every row in a table has the same (types of) columns 
 * Relationships are implicit: no pointers
 
+## Relational databases concept
+
 ```{r, echo = FALSE}
 rdb1 <- data.frame(course = c("GRAD-E123", " GRAD-E123", " GRAD-E456", "GRAD-E456"), Student_ID = c(223, 224, 255, 244))
 rdb2 <- data.frame(Student_ID = c(223, 224, 255), Student_Name = c("Jane", "Joe", "Susan"))
@@ -209,7 +217,7 @@ knitr::kable(rdb2)
 ```
 
 
-## Relational databases history
+## Relational databases concept
 
 * Pre relational: if your data changed, your application broke
 * Early RDBMS were buggy and slow, but required only 5% of the application code
@@ -218,10 +226,6 @@ Notion of data independence:
 
 > "Activities of users at terminals and most application programs should remain unaffected when the internal representation of data is changed and even when some aspects of the external representation are changed."
 (Ted Cod)
-
-Relational algebra:
-
-* Programs that manipulate a tabular data exhibit an \alert{algebraic structure} that we can use to reason about them and manipulate the logical model independent of any physical data representation
 
 ## Physical data independence
 
@@ -544,6 +548,8 @@ SELECT MAX(budget)
 FROM films
 ```
 
+## Aggregate functions
+
 The `SUM` function returns the result of adding up the numeric values in a column:
 
 ```{r,eval = FALSE}
@@ -625,25 +631,30 @@ HAVING COUNT(title) > 10
 
 ##  Joins
 
-dplyr                        | SQL
------------------------------|-------------------------------------------
-`inner_join(x, y, by = "z")` | `SELECT * FROM x INNER JOIN y USING (z)`
-`left_join(x, y, by = "z")`  | `SELECT * FROM x LEFT OUTER JOIN y USING (z)`
-`right_join(x, y, by = "z")` | `SELECT * FROM x RIGHT OUTER JOIN y USING (z)`
-`full_join(x, y, by = "z")`  | `SELECT * FROM x FULL OUTER JOIN y USING (z)`
+dplyr                        
+-----------------------------|
+`inner_join(x, y, by = "z")` |
+`left_join(x, y, by = "z")`  |
+`right_join(x, y, by = "z")` | 
+`full_join(x, y, by = "z")`  | 
 
+SQL
+----------------------------------------------|
+ `SELECT * FROM x INNER JOIN y USING (z)`     |
+`SELECT * FROM x LEFT OUTER JOIN y USING (z)` |
+`SELECT * FROM x RIGHT OUTER JOIN y USING (z)`|
+`SELECT * FROM x FULL OUTER JOIN y USING (z)` |
 
-## `UNION`
+## `UNION`, `INTERSECT`, `EXCEPT`
 
 The `UNION` operator is used to combine the results of two or more `SELECT` statements without returning any duplicate rows.
 
 ```{r, eval = FALSE}
-SELECT  prime_minister AS leader, country
-FROM prime_ministers
+SELECT column1 
+FROM table1
 UNION
-SELECT monarch, country
-FROM monarchs
-ORDER BY country
+SELECT column1
+FROM table1
 ```
 
 The `INTERSECT` operator is used to combine two `SELECT` statements but returns rows only from the first `SELECT` statement that are identical to a row in the second `SELECT` statement.
@@ -682,6 +693,8 @@ flights %>%
   dplyr::group_by(carrier) %>%
   dplyr::summarize(delay = median(arr_delay, na. rm =TRUE))
 ```
+
+## SQL vs R
 
 PostgreSQL:
 
@@ -722,7 +735,7 @@ You need to install a specific backend for the database that you want to connect
 ## Connecting to a database file
 
 ```{r}
-con <- DBI::dbConnect(RSQLite::SQLite(), path = ":memory:")
+con<-DBI::dbConnect(RSQLite::SQLite(),path = ":memory:")
 ```
 
 
@@ -732,14 +745,15 @@ con <- DBI::dbConnect(RSQLite::SQLite(), path = ":memory:")
 con <- DBI::dbConnect(RMySQL::MySQL(), 
   host = "database.rstudio.com",
   user = "hadley",
-  password = rstudioapi::askForPassword("Database password")
+  password = rstudioapi::askForPassword(
+    "Database password")
 )
 ```
 
 ## Creating a database
 
-```{r}
-con <- DBI::dbConnect(RSQLite::SQLite(), path = ":memory:")
+```{r, warning=FALSE, message = FALSE}
+con<-DBI::dbConnect(RSQLite::SQLite(),path = ":memory:")
 dbWriteTable(con, "flights", nycflights13::flights)
 dbListTables(con)
 flights_db <- tbl(con, "flights")
@@ -816,115 +830,18 @@ Get together in groups of two or three and
     + Get all information for Spanish language films released after 2000, but before 2010
     + Get the names of people who are still alive
     + Get the amount grossed by the best performing film between 2000 and 2012
+
+
+## Group exercise
+3. complete the following tasks using either SQL or `dplyr`'s language:
+
     + Get the average duration in hours for all films, aliased as `avg_duration_hours`
     + Get the IMDB score and count of film reviews grouped by IMDB score
     + Get the country, average budget, and average gross take of countries that have made more than 10 films.
     Order the result by country name, and limit the number of results displayed to 5. You should alias the
     averages as avg_budget and avg_gross respectively
     + Disconnect from your database
-
-## Group exercise solution
-Set up the database
-```{r}
-con <- dbConnect(SQLite(), dbname = "data/films.sqlite")
-```
-
-Write tables into the database
-```{r}
-dbWriteTable(con, "films", films)
-dbWriteTable(con, "people", people)
-dbWriteTable(con, "reviews", reviews)
-dbWriteTable(con, "roles", roles)
-dbListTables(con)
-```
-
-## Group exercise solution
-
-title, release year and country for every film
-```{r, eval = FALSE}
-DBI::dbGetQuery(con, "SELECT title, release_year, country
-                         FROM films")
-```
-
-different type of film roles
-```{r}
-DBI::dbGetQuery(con, "SELECT DISTINCT role
-                FROM roles")
-```
-
-number of unique languages
-```{r}
-DBI::dbGetQuery(con, "SELECT COUNT(DISTINCT language)
-                FROM films")
-```
-
-
-## Group exercise solution
-
-number of films released before 2000
-```{r}
-DBI::dbGetQuery(con, "SELECT COUNT(id)
-                FROM films
-                WHERE release_year < 2000")
-```
-
-name and birth date of the person born on November 11th, 1974
-```{r}
-DBI::dbGetQuery(con, "SELECT name, birthdate
-                FROM people
-                WHERE birthdate = '1974-11-11'")
-```
-
-Spanish language films released after 2000, but before 2010
-```{r, eval = FALSE}
-DBI::dbGetQuery(con, "SELECT *
-                FROM films
-                WHERE language = 'Spanish' AND release_year > 2000 
-                AND release_year < 2010")
-```
-
-## Group exercise solution
-
-people who are still alive
-```{r, eval = FALSE}
-DBI::dbGetQuery(con, "SELECT name
-                           FROM people
-                           WHERE deathdate IS NULL")
-```
-
-amount grossed by the best performing film between 2000 and 2012
-```{r, eval = FALSE}
-DBI::dbGetQuery(con, "SELECT MAX(gross)
-                FROM films
-                WHERE release_year BETWEEN 2000 AND 2012")
-```
-
-average duration in hours for all films
-```{r}
-DBI::dbGetQuery(con, "SELECT AVG(duration / 60.0) AS avg_duration_hours
-                FROM films")
-```
-
-## Group exercise solution
-
-IMDB score and count of film reviews grouped by IMDB score
-```{r, eval = FALSE}
-DBI::dbGetQuery(con, "SELECT imdb_score, COUNT(id)
-                FROM reviews
-                GROUP BY imdb_score")
-```
-
-## Group exercise solution
-final task
-```{r, eval = FALSE}
-DBI::dbGetQuery(con, "SELECT country, AVG(budget) AS avg_budget, 
-                        AVG(gross) AS avg_gross
-                FROM films
-                GROUP BY country
-                HAVING COUNT(id) > 10
-                ORDER BY country
-                LIMIT 5")
-```
+    
 
 # Homework Exercises
 
