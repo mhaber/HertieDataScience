@@ -1,0 +1,727 @@
+---
+title: "Data Management With R: Relational Data"
+author: "Matthias Haber"
+date: "16 October 2017"
+output:
+  beamer_presentation:
+    theme: "metropolis"
+    colortheme: "default"
+    fonttheme: "default"
+    fig_caption: false
+    df_print: default
+    toc: false
+  ioslides_presentation:
+  slidy_presentation: default
+  linkcolor: "red"
+---
+# Last weeks Homework
+
+## Last weeks Homework
+
+
+
+# Prerequisites
+
+## Packages
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(dbplyr) # install.packages("dbplyr")
+library(nycflights13)
+library(readr)
+```
+
+## Data
+
+```{r, message = FALSE, warning = FALSE}
+films <- read_csv("data/films.csv")
+people <- read_csv("data/people.csv")
+reviews <- read_csv("data/reviews.csv")
+roles <- read_csv("data/roles.csv")
+```
+
+
+# Terminology
+
+## Databases
+
+What is a database:
+
+> A collection of information organized to afford efficient retrievel.
+
+> "When people use the word database, fundamentally what they are saying is that the data should be self-describing and it should have a schema."
+                                        (Jim Gray)
+
+## Databases
+
+Advantages of databases:
+
+1. Sharing
+
+    + Support concurrent access by multiple readers and writers
+    
+2. Data Model Enforcement
+
+    + Make sure all applications see clean, organized data
+    
+3. Scale
+
+    + Work with datasets too large to fit into memory
+    
+4. Flexibility
+
+    + Use the data in new, unanticipated ways
+
+## Pre-Relational Databases
+
+Evaluate databases:
+
+* How are the data physically organized on disk?
+
+* What kinds of queries are efficiently supported, and which are not?
+
+* How hard is it to update the data, or add new data
+
+* What happes when I encounter new queries that I didn't anticipate. Do I reorganize the data?
+
+## Historical example: network databases
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/networkDB.png")
+```
+
+* All programs must be rewritten to accommodate reorganizations of the data
+
+* difficultto look up all orders that involve a specific part
+
+
+## Historical example: hierachical databases
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/hierachicalDB.png")
+```
+
+- hierachical order of data in terms of segments (e.g. IBM's IMS system that still exists)
+
+    + works great if you want to find all orders for a particular customer
+    + but what if you want to find all customers who ordered a Nail?
+
+
+## Relational databases
+
+Key idea of relational databases
+
+> "Relational Database Management Systems were invented to let you use one set of data in multiple ways. Including ways that were unforeseen at the time the database is built, and then at the time the first applications are written."
+              (Curt Monash)
+
+## Relational database philisophy
+
+> God made the integers; all else is the work of man.
+(Leopold Kronecker, 19th century mathematician)
+
+> Cood made relations; all else is the work of man.
+(Raghu Ramakrishnan, DB text book author)
+
+## Relational databases concept
+
+Relational databases (Edgar Codd 1970)
+
+* Everything is a table
+* Every row in a table has the same (types of) columns 
+* Relationships are implicit: no pointers
+
+```{r, echo = FALSE}
+rdb1 <- data.frame(course = c("GRAD-E123", " GRAD-E123", " GRAD-E456", "GRAD-E456"), Student_ID = c(223, 224, 255, 244))
+rdb2 <- data.frame(Student_ID = c(223, 224, 255), Student_Name = c("Jane", "Joe", "Susan"))
+knitr::kable(rdb1)
+knitr::kable(rdb2)
+```
+
+
+## Relational databases history
+
+* Pre relational: if your data changed, your application broke
+* Early RDBMS were buggy and slow, but required only 5% of the application code
+
+Notion of data independence:
+
+> "Activities of users at terminals and most application programs should remain unaffected when the internal representation of data is changed and even when some aspects of the external representation are changed."
+(Ted Cod)
+
+Relational algebra:
+
+* Programs that manipulate a tabular data exhibit an \alert{algebraic structure} that we can use to reason about them and manipulate the logical model independent of any physical data representation
+
+## Physical data independence
+
+Access data through a high-level language (SQL), not physical pointers.
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/dataIndependece.png")
+```
+
+## Algebra of tables
+
+Use operations from relational algebra and set theory.
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/algebra.png")
+```
+
+## Algebraic optimization
+
+$N = ((z*2)+((z*3)+0))/1$
+
+## Algebraic optimization
+
+$N = ((z*2)+((z*3)+0))/1$
+
+Algebraic laws:
+
+1. $x+0 = x$
+2. $x/1 = x$
+3. $(n*x+n*y)= n*(x+y)$ 
+4. $x*y=y*x$
+
+Apply rules 1,3,4,2:
+$N=(2+3)*z$
+
+All relational databases do algebraic optimization when you write a query.
+
+## Relational algebra operators
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/relationalAlgebra.png")
+```
+
+## Sets vs. bags
+
+Sets: {a,b,c}, {a,d,e,f}, {},...
+Bags: {a,a,b,c}, {b,b,b,b,b},...
+
+Relational algebra has two semantics:
+
+* Set semantics = standard relational algebra
+* Bag semantics = extented relational algebra 
+
+Rule of thumb:
+
+- Every commercial database will assume bag semantics
+## Union
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/union.png")
+```
+
+## Difference
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/difference.png")
+```
+
+## Intersection
+
+- Derived operator using minus:
+
+$R1 \cap R2 = R1-(R1-R2)$
+
+- Derived using joins:
+
+$R1 \cap R2 = R1 \bowtie R2$
+
+## Selection
+
+- Returns all tuples which satisfy a condition
+
+$\sigma_c(R)$
+
+- The condition $c$ can be $=,<,\leq, >, \geq,<>$
+
+- And you can also use boolean expression (and, or ,not)
+
+## Selection
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/selection.png")
+```
+
+## Projection
+
+- Eliminates columns
+
+$\prod_{A1,...,An}(R)$
+
+## Projection
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/projection.png")
+```
+
+## Cross Product
+
+- Each tuple in $R1$ with each tuple in $R2$: $R1 \times R2$
+
+- Rare in practice, but can come up in analytics
+
+    + e.g. find all pairs of similar tweets
+
+## Cross Product
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/crossproduct.png")
+```
+
+## Join
+
+
+A join is a way of connecting each row in `x` to zero, one, or more rows in `y`. The following diagram shows each potential match as an intersection of a pair of lines.
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/join-setup2.png")
+```
+
+## Inner join
+
+The simplest type of join is the __inner join__. An inner join matches pairs of observations whenever their keys are equal. Unmatched rows are not included in the result
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/join-inner.png")
+```
+
+## Outer joins
+
+An inner join keeps observations that appear in both tables. An __outer join__ keeps observations that appear in at least one of the tables. There are three types of outer joins:
+
+* A __left join__ keeps all observations in `x`.
+* A __right join__ keeps all observations in `y`.
+* A __full join__ keeps all observations in `x` and `y`.
+
+```{r, echo = FALSE, out.width = NULL}
+knitr::include_graphics("img/join-outer.png")
+```
+
+The most commonly used join is the left join: you use this whenever you look up additional data from another table, because it preserves the original observations even when there isn't a match.
+
+# SQL
+
+## SQL
+
+\alert{S}tructure \alert{Q}uery \alert{L}anguage is a language for interacting with databases. SQL is over 40 years old, and is used by pretty much every database in existence.
+
+- A query is a request for data from a database table (or combination of tables)
+
+- SQL can be used to query but also to create and modify databases. 
+
+## `SELECT`
+
+In SQL, you can select data from a table using a `SELECT` statement. For example, the following query selects the name column `FROM` the people table:
+
+```{r,eval = FALSE}
+SELECT name
+FROM people
+```
+
+`SELECT` and `FROM` are keywords. They are not case-sensitive but it's good practice to make SQL keywords uppercase to distinguish them from other parts of your query, like column and table names.
+
+## `SELECT`
+
+To select multiple columns from a table, simply separate the column names with commas!
+
+```{r,eval = FALSE}
+SELECT name, birthdate
+FROM people
+```
+
+To select all columns
+
+```{r,eval = FALSE}
+SELECT *
+FROM people
+```
+
+You can also `LIMIT` the number of rows returned:
+
+```{r,eval = FALSE}
+SELECT *
+FROM people
+LIMIT 10
+```
+
+## `SELECT DISTINCT`
+
+You can use the `DISTINCT` keyword to select all the unique values from a column.
+
+```{r,eval = FALSE}
+SELECT DISTINCT language
+FROM films
+```
+
+## `COUNT`
+
+The `COUNT` statement returns the number of rows in one or more columns.
+
+```{r,eval = FALSE}
+SELECT COUNT(*)
+FROM people
+```
+
+It's common to combine `COUNT` with `DISTINCT` to count the number of distinct values in a column.
+
+```{r,eval = FALSE}
+SELECT COUNT(DISTINCT birthdate)
+FROM people
+```
+
+## `WHERE`
+
+The `WHERE` keyword allows you to filter based on both text and numeric values in a table. The `WHERE` clause always comes after the `FROM` statement.
+
+```{r,eval = FALSE}
+SELECT title
+FROM films
+WHERE title = 'Metropolis'
+```
+
+## `WHERE AND`
+
+You can build up your `WHERE` queries by combining multiple conditions with the `AND` keyword.
+
+```{r,eval = FALSE}
+SELECT title
+FROM films
+WHERE release_year > 1994
+AND release_year < 2000
+```
+
+## `WHERE AND OR`
+
+The `OR` operator allows you to select rows based on multiple conditions where some but not all of the conditions need to be met?
+
+```{r,eval = FALSE}
+SELECT title
+FROM films
+WHERE release_year = 1994
+OR release_year = 2000
+```
+
+## `BETWEEN`
+
+The `BETWEEN` keyword provides a useful shorthand for filtering values within a specified range. `BETWEEN` is always inclusive can be used with multiple `AND` and `OR` operators
+
+```{r,eval = FALSE}
+SELECT title
+FROM films
+WHERE release_year
+BETWEEN 1994 AND 2000
+```
+
+## `WHERE IN`
+
+The `IN` operator allows you to specify multiple values in a `WHERE` clause, making it easier and quicker to specify multiple `OR` conditions.
+
+```{r,eval = FALSE}
+SELECT name
+FROM kids
+WHERE age IN (2, 4, 6, 8, 10)
+```
+
+## `NULL` and `IS NULL`
+
+`NULL` represents a missing or unknown value. You can check for NULL values using the expression `IS NULL`. 
+
+```{r,eval = FALSE}
+SELECT COUNT(*)
+FROM people
+WHERE birthdate IS NULL
+```
+
+You can use the `IS NOT NULL` operator to filter out missing values.
+
+## `LIKE` and `NOT LIKE`
+
+The `LIKE` operator can be used in a `WHERE` clause to search for a pattern in a column. You use a wildcard as a placeholder for some other values. There are two wildcards you can use with `LIKE`:
+
+- The `%` wildcard will match zero, one, or many characters in text:
+
+- The `_` wildcard will match a single character. 
+
+For example,
+
+```{r,eval = FALSE}
+SELECT name
+FROM companies
+WHERE name LIKE 'Data%'
+```
+
+finds 'Data', 'Datab', 'Database'.
+
+## Aggregate functions
+
+SQL provides a few functions to perform some calculation on the data in a database. Those aggregate functions can also be combined with the `WHERE` clause
+
+For example,
+
+```{r,eval = FALSE}
+SELECT AVG(budget)
+FROM films
+```
+
+gives you the average value from the budget column of the films table. Similarly, the `MAX` function returns the highest budget:
+
+```{r,eval = FALSE}
+SELECT MAX(budget)
+FROM films
+```
+
+The `SUM` function returns the result of adding up the numeric values in a column:
+
+```{r,eval = FALSE}
+SELECT SUM(budget)
+FROM films
+```
+
+## Arithmetics
+
+You can perform basic arithmetic with symbols like `+`, `-`, `*`, and `/`.
+
+For example, this gives a result of 12:
+
+```{r,eval = FALSE}
+SELECT (4 * 3)
+```
+
+However, the following gives a result of 1, 
+
+```{r,eval = FALSE}
+SELECT (4 / 3)
+```
+
+SQL assumes that if you divide an integer by an integer, you want to get an integer back. If you want more precision when dividing, you can add decimal places to your numbers.
+
+
+## `AS`
+
+You use the `AS` keyword to assign a temporary name to something (i.e. alias).
+
+```{r,eval = FALSE}
+SELECT MAX(budget) AS max_budget,
+       MAX(duration) AS max_duration
+FROM films
+```
+
+## `ORDER BY`
+
+The `ORDER BY` keyword is used to sort results according to the values of one or more columns. By default `ORDER BY` will sort in ascending order. If you want to sort the results in descending order, you can use the `DESC` keyword.
+
+```{r,eval = FALSE}
+SELECT title
+FROM films
+ORDER BY release_year DESC
+```
+
+## `ORDER BY` multiple columns
+
+`ORDER BY` can also be used to sort on multiple columns. It will sort by the first column specified, then sort by the next, then the next, and so on.
+
+```{r,eval = FALSE}
+SELECT birthdate, name
+FROM people
+ORDER BY birthdate, name
+```
+
+## `GROUP BY`
+
+`GROUP BY` allows you to group a result by one or more columns. `GROUP BY` always goes after the `FROM` clause.
+
+```{r,eval = FALSE}
+SELECT sex, count(*)
+FROM employees
+GROUP BY sex
+```
+
+Commonly, `GROUP BY` is used with aggregate functions like `COUNT()` or `MAX()`. 
+
+## `HAVING`
+
+In SQL, aggregate functions can't be used in `WHERE` clauses. If you want to filter based on the result of an aggregate function, you need to use the `HAVING` clause.
+
+```{r,eval = FALSE}
+SELECT release_year
+FROM films
+GROUP BY release_year
+HAVING COUNT(title) > 10
+```
+
+## `INNER JOIN`
+
+`INNER JOIN` matches pairs of observations whenever their keys are equal.
+
+```{r,eval = FALSE}
+SELECT *
+FROM left_table
+INNER JOIN right_table
+ON left_table.id = right_table.id
+```
+
+## `LEFT JOIN`
+
+The `LEFT JOIN` keyword returns all records from the left table (table1), and the matched records from the right table (table2). The result is `NULL` from the right side, if there is no match.
+
+```{r,eval = FALSE}
+SELECT p1.country, prime_minister, president
+FROM prime_ministers AS p1
+LEFT JOIN presidents AS p2
+ON p1.country = p2.country
+```
+
+## `FULL JOIN`
+
+The `FULL JOIN` keyword return all records when there is a match in either left (table1) or right (table2) table records.
+
+```{r, eval = FALSE}
+SELECT p1.country AS pm_co, 
+       p2.country AS pres_co,
+       prime_minister, president
+FROM prime_ministers AS p1
+FULL JOIN presidents AS p2
+ON p1.country = p2.country
+```
+
+## `UNION`
+
+```{r, eval = FALSE}
+SELECT  prime_minister AS leader, country
+FROM prime_ministers
+UNION
+SELECT monarch, country
+FROM monarchs
+ORDER BY country
+```
+
+## `INTERSECT`
+
+```{r, eval = FALSE}
+SELECT  country, prime_minister AS leader
+FROM prime_ministers
+INTERSECT
+SELECT country, president
+FROM presidents
+```
+
+## `EXCEPT`
+
+```{r, eval = FALSE}
+SELECT monarch, country
+FROM monarchs
+EXCEPT
+SELECT prime_ministers, country
+FROM prime_ministers
+```
+## User-defined function support
+
+- PostgreSQL
+
+    + SQL, PL/pSQL, Python, C/C++, R
+    
+- Microsoft SQL Server
+
+    + SQL, T-SQL, C#
+
+- Oracle
+
+    - SQL, PL-SQL, Java, C/C++, Python, others
+    
+- SQLite
+
+    - None
+
+
+# SQL in R
+
+## SQL vs R
+
+SQL is not designed to do data analysis. For example, calculate the median arrival delay per carrier.
+
+Using `dplyr`:
+```{r, eval = FALSE}
+flights %>%
+  dplyr::group_by(carrier) %>%
+  dplyr::summarize(delay = median(arr_delay, na. rm =TRUE))
+```
+
+PostgreSQL:
+
+```{r, eval = FALSE}
+WITH ordered_flights AS (
+ SELECT arr_delay,
+        row_number() OVER (order by id) AS row_id,
+        (SELECT COUNT(1) from flights) AS ct
+ FROM flights
+)
+
+SELECT AVG(arr_delay) AS median
+FROM ordered_flights
+WHERE row_id BETWEEN ct/2.0 AND ct/2.0 + 1
+```
+
+## SQL and R
+
+Good idea to store data in SQL and use R to analyze it.
+`dbplyr`, for example, also works with remote on-disk data stored in databases.
+
+The goal of `dbplyr` is to automatically generate SQL for you so that you’re not forced to use it. Most of the time you don’t need to know anything about SQL, and you can continue to use the `dplyr` verbs that you’re already familiar with
+
+## Connecting to a database
+
+You need to install a specific backend for the database that you want to connect to:
+
+* `RMySQL` connects to MySQL and MariaDB
+
+* `RPostgreSQL` connects to Postgres and Redshift
+
+* `RSQLite` embeds a SQLite database (comes with `dbplyr`)
+
+* `odbc` connects to many commercial databases via the open database connectivity protocol
+
+* `bigrquery` connects to Google’s BigQuery
+
+## Connecting to a database file
+
+```{r}
+con <- DBI::dbConnect(RSQLite::SQLite(), dbname='films.sqlite')
+dbListTables(con)
+```
+
+
+## Connecting to an online database
+
+```{r, eval = FALSE}
+con <- DBI::dbConnect(RMySQL::MySQL(), 
+  host = "database.rstudio.com",
+  user = "hadley",
+  password = rstudioapi::askForPassword("Database password")
+)
+```
+
+## Creating a database
+
+```{r}
+con <- dbConnect(SQLite(), dbname = "films.sqlite")
+dbWriteTable(con, "films", films)
+dbWriteTable(con, "people", people)
+dbWriteTable(con, "reviews", reviews)
+dbWriteTable(con, "roles", roles)
+dbListTables(con)
+```
+
+# Homework Exercises
+
+## Homework Exercises
+For this week's homework exersises go to Moodle and answer the Quiz posted in the Relational Data section.
+
+Deadline: Sunday, October 30 before midnight.
+
+
+##  {.standout}
+That's it for today. Questions?    
+
