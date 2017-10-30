@@ -1,5 +1,6 @@
 ---
 title: "Data Management With R: Working with Strings"
+always_allow_html: yes
 author: "Matthias Haber"
 date: "30 October 2017"
 output:
@@ -13,11 +14,43 @@ output:
   ioslides_presentation:
   slidy_presentation: default
   linkcolor: "red"
+
 ---
 
-# Final project
+# Final project datasets
 
-## Datasets
+## UNHCR Statistics
+
+Description: The database contains data about UNHCR's populations of concern from 1951 to 2014. 
+
+Goal: Investigate different aspects of  UNHCR's populations their general composition by location of residence or origin, their status (refugees, asylum seekers, internally displaced persons, etc.), their evolution over time, and so on.
+
+Prerequisites: 
+
+* Download the individual tables from the UNHCR website: http://popstats.unhcr.org/en/overview or access the API directly in R: http://data.unhcr.org/wiki/index.php/API_Documentation.html
+* Put the tables in a database
+
+## Armed Conflict Location & Event Data
+
+Description: This dataset codes the dates and locations of all reported political violence and protest events in developing countries. Political violence includes events that occur within civil wars and periods of instability.
+
+Goal: Find out where and why violent conflicts broke out and how they developed over time.
+
+Prerequisites: 
+
+* Download either the Africa (ACLED Version 7 (1997 – 2016)) or the Asia (ACLED Asia) datasets (or both): https://www.acleddata.com/data/
+
+## Scottish Witchcraft
+
+Description: This database contains a variety of information on the almost 4,000 people who were accused of practicing witchcraft between 1563 and 1736 in Scotland. 
+
+Goal: Find out what it took to be accused of witchcraft.
+
+Prerequisites
+
+* Download the .zip from GitHub (https://github.com/mhaber/HertieDataScience/blob/master/finalProject/history-scottish-witchcraft.zip) and access it directly in R and extract the tables.
+* Put the tables in a database
+
 
 # Prerequisites
 
@@ -28,20 +61,6 @@ library(tidyverse)
 library(stringr) #install.packages("stringr")
 ```
 
-## Data
-
-```{r, message = FALSE, warning = FALSE}
-url <- paste0("https://raw.githubusercontent.com/mhaber/",
-              "HertieDataScience/",
-              "master/slides/week7/data/")
-films <- read_csv(paste0(url, "films.csv"))
-people <- read_csv(paste0(url, "people.csv"),
-                   col_types = "iccc")
-reviews <- read_csv(paste0(url, "reviews.csv"))
-roles <- read_csv(paste0(url, "roles.csv"))
-#flights
-```
-
 # Strings
 
 ## Creating strings
@@ -50,8 +69,8 @@ Strings are wrapped in `'` or `"` quotes:
 
 ```{r}
 string1 <- "This is a string"
-string2 <- 'If I want to include a "quote" inside a string, I use single quotes'
-
+string2 <- 'If I want to include a "quote" inside
+a string, I use single quotes'
 ```
 
 You can use `\` to “escape” single or double quotes inside a string:
@@ -93,11 +112,16 @@ str_sub(x, 1, 3)
 str_sub(x, -3, -1)
 ```
 
+## Functions for strings
 ```{r}
 # Changing case
 str_to_upper(c("a", "b"))
 str_to_lower(c("A", "B"))
 ```
+
+## Functions for strings
+`stringr` has 43 functions to manipulate strings. If you need more, then use `stringi`, which has 232 functions. The main difference between the functions in both packages is the prefix: `str_` vs. `stri_`.
+
 
 # Regular expressions
 
@@ -106,33 +130,89 @@ str_to_lower(c("A", "B"))
 Regular Expressions (regex) are a language or syntax to search in texts.
 Regex are used by most search engines in one form or another and are part of almost any programming language. In R, many string functions in `base` R as well as in `stringr` package use regular expressions, even Rstudio's search and replace allows regular expression.
 
-You could use regex to e.g.:
-
-- Count the occurence of certain persons/organization etc. in text
-- Calculate the sums of fund discussed in legislation
-- Chose your texts based on regexes
-
-In textpreparation, regex are used to remove certain unwanted parts of text.
-
 ## Regular expression syntax 
 
 Regular expressions typically specify characters to seek out, possibly with information about repeats and location within the string. This is accomplished with the help of metacharacters that have specific meaning: 
 
-- `$ * + . ? [ ] ^ { } | ( ) \`. 
+* `$ * + . ? [ ] ^ { } | ( ) \`. 
 
 
 ## String functions related to regular expression
 
-- `grep(..., value = FALSE)`, `grepl()`, `stringr::str_detect()` to identify match to a pattern
+* To identify match to a pattern
+
+    + `grep(..., value = FALSE)`, `grepl()`, `stringr::str_detect()` 
   
-- `grep(..., value = TRUE)`, `stringr::str_extract()`, `stringr::str_extract_all()` to extract match to a pattern     
+* To extract match to a pattern
+
+    + `grep(..., value = TRUE)`, `stringr::str_extract()`, `stringr::str_extract_all()`
   
-- `regexpr()`, `gregexpr()`, `stringr::str_locate()`, `string::str_locate_all()` to locate pattern within a string     
+* To locate pattern within a string
+
+    + `regexpr()`, `gregexpr()`, `stringr::str_locate()`, `stringr::str_locate_all()`
   
-- `sub()`, `gsub()`, `stringr::str_replace()`, `stringr::str_replace_all()` to replace a pattern     
+* To replace a pattern
+
+    + `sub()`, `gsub()`, `stringr::str_replace()`, `stringr::str_replace_all()`    
   
-- `strsplit()`, `stringr::str_split()` to split a string using a pattern 
+* To split a string using a pattern
+
+    + `strsplit()`, `stringr::str_split()`
   
+
+## Pattern matching
+
+The simplest patterns match exact strings:
+
+```{r}
+x <- c("apple", "banana", "pear")
+str_view(x, "an")
+```
+
+```{r, echo = FALSE, out.width = "150px"}
+knitr::include_graphics("img/str_view.jpeg")
+```
+
+## Pattern matching
+
+`.` matches any character (except a newline):
+
+```{r}
+str_view(x, ".a.")
+```
+
+```{r, echo = FALSE, out.width = "150px"}
+knitr::include_graphics("img/str_view2.jpeg")
+```
+
+
+## Position of pattern within the string 
+
+`^` matches the start of the string.   
+  
+```{r}
+x <- c("apple", "banana", "pear")
+str_view(x, "^a")
+```
+
+```{r, echo = FALSE, out.width = "150px"}
+knitr::include_graphics("img/str_view3.jpeg")
+```
+
+## Position of pattern within the string 
+
+`$` matches the end of the string.  
+  
+```{r}
+str_view(x, "a$")
+```
+
+```{r, echo = FALSE, out.width = "150px"}
+knitr::include_graphics("img/str_view4.jpeg")
+```
+
+`\b` matches the empty string at either edge of a _word_.   
+`\B` matches the empty string provided it is not at an edge of a word.  
 
 ## Quantifiers
 
@@ -146,58 +226,51 @@ Quantifiers specify the number of repetitions of the pattern.
   * `{n,m}`: matches between n and m times.     
 
 
-## Quantifiers (II)
+## Quantifiers
 
-```{r quantifiers}
+```{r}
 strings <- c("a", "ab", "acb", "accb", "acccb", "accccb")
 grep("ac*b", strings, value = TRUE)
 grep("ac+b", strings, value = TRUE)
 grep("ac?b", strings, value = TRUE)
+```
+
+## Quantifiers
+
+```{r}
 grep("ac{2}b", strings, value = TRUE)
 grep("ac{2,}b", strings, value = TRUE)
 grep("ac{2,3}b", strings, value = TRUE)
 ```
 
-
-## Position of pattern within the string 
-
-  * `^`: matches the start of the string.   
-  * `$`: matches the end of the string.   
-  * `\b`: matches the empty string at either edge of a _word_. Don't confuse it with `^ $` which marks the edge of a _string_.   
-  * `\B`: matches the empty string provided it is not at an edge of a word.    
-
-```{r position}
-(strings <- c("abcd", "cdab", "cabd", "c abd"))
-grep("ab", strings, value = TRUE)
-grep("^ab", strings, value = TRUE)
-grep("ab$", strings, value = TRUE)
-grep("\\bab", strings, value = TRUE)
-```
-
-
-## Operators
-
-* `.`: matches any single character
+  
+## More operators
+* `\`: suppress the special meaning of metacharacters in regular expression, i.e. `$ * + . ? [ ] ^ { } | ( ) \`, similar to its usage in escape sequences. Since `\` itself needs to be escaped in R, we need to escape these metacharacters with double backslash like `\\$`. 
 * `[...]`: a character list, matches any one of the characters inside the square brackets. We can also use `-` inside the brackets to specify a range of characters.   
 * `[^...]`: an inverted character list, similar to `[...]`, but matches any characters __except__ those inside the square brackets.  
-* `\`: suppress the special meaning of metacharacters in regular expression, i.e. `$ * + . ? [ ] ^ { } | ( ) \`, similar to its usage in escape sequences. Since `\` itself needs to be escaped in R, we need to escape these metacharacters with double backslash like `\\$`.   
+  
+
+## More operators
 * `|`: an "or" operator, matches patterns on either side of the `|`.  
 * `(...)`: grouping in regular expressions which allows to retrieve the bits that matched various parts of your regular expression. Each group can than be refer using `\\N`, with N being the No. of `(...)` used. This is called __backreference__.    
 
 
-## Operators (II)
+## Operators
 
-```{r operators}
+```{r}
 strings <- c("^ab", "ab", "abc", "abd", "abe", "ab 12")
-grep("ab.", strings, value = TRUE)
 grep("ab[c-e]", strings, value = TRUE)
 grep("ab[^c]", strings, value = TRUE)
+```
+
+## Operators
+
+```{r}
 grep("^ab", strings, value = TRUE)
 grep("\\^ab", strings, value = TRUE)
 grep("abc|abd", strings, value = TRUE)
 gsub("(ab) 12", "\\1 34", strings)
 ```
-
 
 ## Character classes
 
@@ -211,7 +284,7 @@ Character classes allow to specify entire classes of characters, such as numbers
   - `[:alnum:]`: alphanumeric characters, equivalent to `[[:alpha:][:digit:]]` or `[A-z0-9]`.
 
   
-## Character classes (II)
+## Character classes
 
   - `\w`: word characters, equivalent to `[[:alnum:]_]` or `[A-z0-9_]`.  
   - `\W`: not word, equivalent to `[^A-z0-9_]`.  
@@ -222,7 +295,7 @@ Character classes allow to specify entire classes of characters, such as numbers
   - `\S`: not space.  
   - `[:punct:]`: punctuation characters, ! " # $ % & ' ( ) - + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~.
   
-## Character classes (III)
+## Character classes
   
   - `[:graph:]`: graphical (human readable) characters: equivalent to `[[:alnum:][:punct:]]`.
   - `[:print:]`: printable characters, equivalent to `[[:alnum:][:punct:]\\s]`.
@@ -243,18 +316,7 @@ There are different [syntax standards](http://en.wikipedia.org/wiki/Regular_expr
   
 You can easily switch between by specifying `perl = FALSE/TRUE` in `base` R functions, such as `grep()` and `sub()`. For functions in the `stringr` package, wrap the pattern with `perl()`. 
 
-## General modes for patterns (II)
-
-There's one last type of regular expression -- "fixed", meaning that the pattern should be taken literally. Specify this via `fixed = TRUE` (base R functions) or wrapping with `fixed()` (`stringr` functions). For example, `"A.b"` as a regular expression will match a string with "A" followed by any single character followed by "b", but as a fixed pattern, it will only match a literal "A.b".  
-
-```{r fixed}
-strings <- c("Axbc", "A.bc")
-pattern <- "A.b"
-grep(pattern, strings, value = TRUE)
-grep(pattern, strings, value = TRUE, fixed = TRUE)
-```
-
-## General modes for patterns (III)
+## General modes for patterns
 
 By default, pattern matching is case sensitive in R, but you can turn it off with `ignore.case = TRUE` (base R functions) or wrapping with `ignore.case()` (`stringr` functions). Alternatively, you can use `tolower()` and `toupper()` functions to convert everything to lower or upper case. Take the same example above: 
 
@@ -275,6 +337,62 @@ The term globbing refers to pattern matching based on wildcard characters. A wil
   * `[...]`: same as regular expression.  
   * `[!...]`: same as `[^...]` in regular expression.   
 
+## Detect matches
+
+To determine if a character vector matches a pattern, use `str_detect()`. It returns a logical vector the same length as the input:
+
+```{r}
+x <- c("apple", "banana", "pear")
+str_detect(x, "e")
+```
+
+## Detect matches
+
+```{r}
+# How many common words start with b?
+sum(str_detect(words, "^b"))
+# What proportion of common words end with a vowel?
+mean(str_detect(words, "[aeiou]$"))
+```
+
+## Detect matches
+A variation on `str_detect()` is `str_count()`: rather than a simple yes or no, it tells you how many matches there are in a string:
+
+```{r}
+x <- c("apple", "banana", "pear")
+str_count(x, "a")
+
+# On average, how many vowels per word?
+mean(str_count(words, "[aeiou]"))
+```
+
+## Replace matches
+
+str_replace()` and `str_replace_all()` allow you to replace matches with new strings. The simplest use is to replace a pattern with a fixed string:
+
+```{r}
+x <- c("apple", "pear", "banana")
+str_replace(x, "[aeiou]", "-")
+str_replace_all(x, "[aeiou]", "-")
+```
+
+## Replace matches
+With `str_replace_all()` you can perform multiple replacements by supplying a named vector:
+
+```{r}
+x <- c("1 house", "2 cars", "3 people")
+str_replace_all(x, c("1" = "one", "2" = "two", "3" = "three"))
+```
+
+## String splitting
+
+Use `str_split()` to split a string up into pieces. 
+
+```{r}
+"a|b|c|d" %>% 
+  str_split("\\|")
+```
+
 ## Resources
 
   - Regular expression in R [official document](https://stat.ethz.ch/R-manual/R-devel/library/base/html/regex.html).  
@@ -284,6 +402,48 @@ The term globbing refers to pattern matching based on wildcard characters. A wil
   
     + [regexpal](http://regexpal.com/)
     + [RegExr](http://www.regexr.com/)   
+
+
+# Group exercises
+
+## Group exercises
+
+1. Given the corpus of common words in `stringr::words`, create regular expressions that find all words that:
+    
+    1. Start with "y".
+    
+    1. End with "x"
+
+    1. Start with a vowel.
+    
+    1. That only contain consonants.
+
+    1. End with `ed`, but not with `eed`.
+    
+    1. End with `ing` or `ise`.
+    
+    1. Start with three consonants.
+    
+    1. Have three or more vowels in a row.
+    
+    1. Have two or more vowel-consonant pairs in a row.
+    
+    1. Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+
+## Group exercises
+
+
+2.  Describe in words what these regular expressions match:
+
+    2. `^.*$`
+    2. `"\\{.+\\}"`
+    2. `\d{4}-\d{2}-\d{2}`
+    2. `"\\\\{4}"`
+    2. `(.)\1\1`
+    2. `"(.)(.)\\2\\1"`
+
+
+3. Solve the beginner regexp crosswords at https://regexcrossword.com/challenges/beginner.
 
 # Homework Exercises
 
