@@ -445,6 +445,72 @@ Use `str_split()` to split a string up into pieces.
 
 3. Solve the beginner regexp crosswords at https://regexcrossword.com/challenges/beginner.
 
+## Group exercises solution
+
+```{r}
+#Words starting with y
+str_view(stringr::words, "^y")
+```
+
+```{r}
+#Words ending with x
+str_view(stringr::words, "x$")
+```
+
+```{r}
+#Words starting with vowels
+str_view(stringr::words, "^[aeiou]")
+```
+
+
+## Group exercises solution
+
+```{r}
+#Words that contain only consonants
+str_view(stringr::words, "^[^aeiou]+$", match=TRUE)
+```
+
+```{r}
+#Words that end with ed but not with eed
+str_view(stringr::words, "^ed$|[^e]ed$", match = TRUE)
+```
+
+```{r}
+#Words ending in ing or ise
+str_view(stringr::words, "i(ng|se)$", match = TRUE)
+```
+
+## Group exercises solution
+
+```{r}
+#All words starting with three consonants
+str_view(words, "^[^aeiou]{3}", match = TRUE)
+```
+
+```{r}
+#Three or more vowels in a row
+str_view(words, "[aeiou]{3,}", match = TRUE)
+```
+
+```{r}
+#Two or more vowel-consonant pairs in a row
+str_view(words, "([aeiou][^aeiou]){2,}", match = TRUE)
+```
+
+```{r}
+#Any two characters repeated
+str_view(words, "(..).*\\1", match = TRUE)
+```
+
+## Group exercises solution
+
+* `^.*$`: Any string
+* `"\\{.+\\}"`: Any string with curly braces surrounding at least one character.
+* `\d{4}-\d{2}-\d{2}`: A date in “%Y-%m-%d” format: four digits followed by a dash, followed by two digits followed by a dash, followed by another two digits followed by a dash.
+* `"\\\\{4}"`: four backslashes
+* `(.)\1\1`: The same character apearing three times in a row
+* `"(.)(.)\\2\\1"`: A pair of characters followed by the same pair of characters in reversed order
+    
 # Homework Exercises
 
 ## Homework Exercises
