@@ -1,7 +1,7 @@
 ---
-title: "Data Management With R: Working with Strings"
+title: "Data Management With R: Webscraping with rvest"
 author: "Matthias Haber"
-date: "30 October 2017"
+date: "06 November 2017"
 output:
   beamer_presentation:
     theme: "metropolis"
@@ -14,6 +14,71 @@ output:
   slidy_presentation: default
   linkcolor: "red"
 ---
+
+## What's HTML?
+
+# HyperText Markup Language
+# markup language = plain text + markups
+# standard for the construction of websites
+# relevance for web scraping: web architecture is important because it determines where and how information is stored
+
+
+## browsing vs. scraping
+
+# browsing
+  # 1. you click on something
+  # 2. browser sends request to server that hosts website
+  # 3. server returns resource (often an HTML document)
+  # 4. browser interprets HTML and renders it in a nice fashion
+
+# scraping with R
+  # 1. you manually specify a resource
+  # 2. R sends request to server that hosts website
+  # 3. server returns resource
+  # 4. R parses HTML (i.e., interprets the structure), but does not render it in a nice fashion
+  # 5. it's up to you to tell R which parts of the structure to focus on and what content to extract
+
+
+## inspect the source code in your browser ---------------
+
+browseURL("https://www.buzzfeed.com/?country=us")
+
+# Chrome:
+  # 1. right click on page
+  # 2. select "view source"
+
+# Firefox:
+  # 1. right click on page
+  # 2. select "view source"
+
+# Microsoft Edge:
+# 1. right click on page
+# 2. select "view source"
+
+# Safari
+  # 1. click on "Safari"
+  # 2. select "Preferences"
+  # 3. go to "Advanced"
+  # 4. check "Show Develop menu in menu bar"
+  # 5. click on "Develop"
+  # 6. select "show page source"
+  # 7. alternatively to 5./6., right click on page and select "view source"
+
+
+## a quick primer to CSS selectors ----------
+
+## What's CSS?
+
+# Cascading Style Sheets
+# style sheet language to give browsers information of how to render HTML document by providing more info on, e.g., layout, colors, and fonts
+# CSS code can be stored within an HTML document or in an external CSS file
+# the good thing for us: selectors, i.e. patterns used to specify which elements to format in a certain way, can be used to address the elements we want to extract information from
+# works via tag name (e.g., <h2>, <p>, ...) or element attributes "id" and "class"
+
+## How does it work?
+browseURL("http://flukeout.github.io/") # let's play this together until plate 8 or so!
+
+
 ## Online text data sources
 
 - **web pages** (e.g. http://example.com)
@@ -88,7 +153,7 @@ read_html() %>%
 html_node(".wikitable") %>%
 
 # 4. extract content from nodes
-html_table()
+html_table(fill = TRUE)
 ```
 
 ## Task 1
@@ -264,7 +329,7 @@ library(tm)
 library(tm.plugin.lexisnexis)
 library(quanteda)
  
-ln <- LexisNexisSource("lexisnexis.HTML")
+ln <- LexisNexisSource("data/lexisnexis.HTML")
 tmCorpus <- VCorpus(ln)
 myCorpus <- corpus(tmCorpus)
 mydfm <- dfm(myCorpus)
@@ -275,7 +340,7 @@ mydfm <- dfm(myCorpus)
 ## Homework Exercises
 For this week's homework exersises go to Moodle and answer the Quiz posted in the Relational Data section.
 
-Deadline: Sunday, October 29 before midnight.
+Deadline: Sunday, November 12 before midnight.
 
 
 ##  {.standout}
