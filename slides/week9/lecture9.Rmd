@@ -1,5 +1,5 @@
 ---
-title: "Data Management With R: Webscraping with rvest"
+title: "Data Management With R: Web scraping"
 author: "Matthias Haber"
 date: "06 November 2017"
 output:
@@ -15,69 +15,131 @@ output:
   linkcolor: "red"
 ---
 
-## What's HTML?
+# Prerequisites
 
-# HyperText Markup Language
-# markup language = plain text + markups
-# standard for the construction of websites
-# relevance for web scraping: web architecture is important because it determines where and how information is stored
+## Packages
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(stringr) 
+library(rvest) #install.packages("rvest")
+library(twitteR) #install.packages("twitteR")
+library(streamR) #install.packages("streamR")
+library(RCurl) #install.packages("RCurl")
+library(ROAuth) #install.packages("ROAuth")
+library(httr) #install.packages("httr")
+```
+
+# Last week's homework
+
+## Email addresses
+
+```{r}
+email <- c("tom@hogwarts.com",
+    "tom.riddle@hogwarts.com",
+    "tom@hogwarts.eu.com",
+    "potter@hogwarts.com",
+    "harry@hogwarts.com",
+    "hermione+witch@hogwarts.com")
+str_extract(email, "^[\\w\\.]*")
+```
+
+## HTML codes
+
+```{r}
+htmlcode <- c("<a>This is a link</a>",
+    "<a href='https://github.com'>Link</a>",
+    "<div class='test_style'>Test</div>",
+    "<div>Hello <span>world</span></div>")
+```
+
+## HTML codes
+
+\footnotesize
+```{r}
+str_extract(htmlcode, "<\\w+")
+str_extract(htmlcode, ">([\\w\\s]*)<")
+str_extract(htmlcode, "='([\\w://.]*)'")
+```
+\normalsize
+
+## file names
+
+\footnotesize
+```{r}
+file <- c(".bash_profile",
+    "workspace.doc",
+    "img0912.jpg",
+    "updated_img0912.png",
+    "documentation.html",
+    "favicon.gif",
+    "img0912.jpg.tmp",
+    "access.lock")
+str_extract(file, "(\\w+)\\.(jpg|png|gif)$")
+```
+\normalsize
+
+## log file
+
+\footnotesize
+```{r}
+log <- c("W/dalvikvm( 1553): threadid=1: uncaught exception",
+    "E/( 1553): FATAL EXCEPTION: main",
+    "E/( 1553): java.lang.StringIndexOutOfBoundsException",
+    "E/( 1553):   at widget.List.makeView(ListView.java:1727)",
+    "E/( 1553):   at widget.List.fillDown(ListView.java:652)",
+    "E/( 1553):   at widget.List.fillFrom(ListView.java:709)")
+str_extract(log, "\\.(\\w+)\\(")
+str_extract(log, ":(\\d+)")
+str_extract(log, ":(\\d+)")
+```
+\normalsize
+
+## URLs
+
+\footnotesize
+```{r}
+url <- c("ftp://file_server.com:21/top_secret/life_changing_plans.pdf",
+           "https://github.com/mhaber/slides#section",
+           "file://localhost:4040/zip_file",
+           "https://s3cur3-server.com:9999/",
+           "market://search/angry%20birds")
+str_extract(url, "(\\w+)://")
+str_extract(url, "://([\\w-\\.]+)")
+str_extract(url, "(:(\\d+))")
+```
+
+\normalsize
 
 
-## browsing vs. scraping
+## Regex help
 
-# browsing
-  # 1. you click on something
-  # 2. browser sends request to server that hosts website
-  # 3. server returns resource (often an HTML document)
-  # 4. browser interprets HTML and renders it in a nice fashion
+[RStudio string cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/strings.pdf)
 
-# scraping with R
-  # 1. you manually specify a resource
-  # 2. R sends request to server that hosts website
-  # 3. server returns resource
-  # 4. R parses HTML (i.e., interprets the structure), but does not render it in a nice fashion
-  # 5. it's up to you to tell R which parts of the structure to focus on and what content to extract
+# Webscraping intro
 
+## Example from my own work
 
-## inspect the source code in your browser ---------------
+I was asked to scrape all job ads listed on [bund.de](http://www.bund.de/Content/DE/Stellen/Suche/Formular.html?nn=4642046&view=processForm&resultsPerPage=100)
 
-browseURL("https://www.buzzfeed.com/?country=us")
+## Browsing vs. scraping
 
-# Chrome:
-  # 1. right click on page
-  # 2. select "view source"
+**Browsing**
 
-# Firefox:
-  # 1. right click on page
-  # 2. select "view source"
+* you click on something
+* browser sends request to server that hosts website
+* server returns resource (often an HTML document)
+* browser interprets HTML and renders it in a nice fashion
 
-# Microsoft Edge:
-# 1. right click on page
-# 2. select "view source"
+## Browsing vs. scraping
 
-# Safari
-  # 1. click on "Safari"
-  # 2. select "Preferences"
-  # 3. go to "Advanced"
-  # 4. check "Show Develop menu in menu bar"
-  # 5. click on "Develop"
-  # 6. select "show page source"
-  # 7. alternatively to 5./6., right click on page and select "view source"
+**Scraping with R**
 
-
-## a quick primer to CSS selectors ----------
-
-## What's CSS?
-
-# Cascading Style Sheets
-# style sheet language to give browsers information of how to render HTML document by providing more info on, e.g., layout, colors, and fonts
-# CSS code can be stored within an HTML document or in an external CSS file
-# the good thing for us: selectors, i.e. patterns used to specify which elements to format in a certain way, can be used to address the elements we want to extract information from
-# works via tag name (e.g., <h2>, <p>, ...) or element attributes "id" and "class"
-
-## How does it work?
-browseURL("http://flukeout.github.io/") # let's play this together until plate 8 or so!
-
+* you manually specify a resource
+* R sends request to server that hosts website
+* server returns resource
+* R parses HTML (i.e., interprets the structure), but does not render it in a nice fashion
+* it's up to you to tell R which parts of the structure to focus on and what content to extract
 
 ## Online text data sources
 
@@ -88,23 +150,63 @@ browseURL("http://flukeout.github.io/") # let's play this together until plate 8
 - **data in the web** (speeches, laws, policy reports, news, ... )
 - **web data** (page views, page ranks, IP-addresses, ...)
 
-## The Problems
-
-**phase**     | **problems** | **examples**
---------------|--------------|----------------------------------------
-**download**  | protocols    | HTTP, HTTPS, POST, GET, ... 
-&nbsp;        | procedures   | cookies, authentication, forms, ...
---------------|--------------|-----------------------------------------
-**extraction**| parsing      | translating HTML (XML, JSON, ...) into R
-&nbsp;        | extraction   | getting the relevant parts
-&nbsp;        | cleansing    | cleaning up, restructure, combine
-
-
 ## Before scraping, do some googling!
 
 - If the resource is well-known, someone else has probably built a tool which solves the problem for you.
 - [ropensci](https://ropensci.org/) has a [ton of R packages](https://ropensci.org/packages/) providing easy-to-use interfaces to open data.
 - The [Web Technologies and Services CRAN Task View](http://cran.r-project.org/web/views/WebTechnologies.html) is a great overview of various tools for working with data that lives on the web in R.
+
+## What's HTML?
+
+**HyperText Markup Language**
+
+* markup language = plain text + markups
+* standard for the construction of websites
+* relevance for web scraping: web architecture is important because it determines where and how information is stored
+
+## Inspect the source code in your browser
+
+**Firefox**
+
+1. right click on page
+2. select "View Page Source"
+
+**Chrome**
+
+1. right click on page
+2. select "View page source"
+
+**Safari**
+
+1. click on "Safari"
+2. select "Preferences"
+3. go to "Advanced"
+4. check "Show Develop menu in menu bar"
+5. click on "Develop"
+6. select "Show Page Source."
+
+
+## CSS?
+
+**Cascading Style Sheets**
+
+* style sheet language to give browsers information of how to render HTML documents
+* CSS code can be stored within an HTML document or in an external CSS file
+* selectors, i.e. patterns used to specify which elements to format in a certain way, can be used to address the elements we want to extract information from
+* works via tag name (e.g.,`<h2>`,`<p>`) or element attributes `id` and `class`
+
+## CSS?
+
+**How does it work?**
+
+[CSS Diner]("http://flukeout.github.io/")
+
+## XPath
+
+* XPath is a query language for selecting nodes from an XML-style document (including HTML)
+* provides just another way of extracting data from static webpages
+* you can also use XPath with R, it can be more powerful than CSS selectors
+
 
 ## Example
 
@@ -126,7 +228,7 @@ knitr::include_graphics("img/inspector.png")
 ```  
 
 
-## Rvest
+## `Rvest`
 
 [rvest](https://github.com/hadley/rvest) is a nice R package for web-scraping by (you guessed it) Hadley Wickham.
 
@@ -138,11 +240,8 @@ knitr::include_graphics("img/inspector.png")
 
 ## Basic workflow of scraping with rvest
 
-
+\footnotesize
 ```{r}
-library(rvest)
-library(magrittr)
-
 # 1. specify URL
 "http://en.wikipedia.org/wiki/Table_(information)" %>% 
 
@@ -156,63 +255,23 @@ html_node(".wikitable") %>%
 html_table(fill = TRUE)
 ```
 
-## Task 1
+\normalsize
 
-Navigate to *[this page](http://www.wunderground.com/history/airport/KVAY/2015/2/17/DailyHistory.html?req_city=Cherry+Hill&req_state=NJ&req_statename=New+Jersey&reqdb.zip=08002&reqdb.magic=1&reqdb.wmo=99999&MR=1)* and try the following:
-
-**Easy**: Grab the table at the bottom of the page (hint: instead of grabbing a node by class with `html_node(".class")`, you can grab by id with `html_node("#id")`)
-
-**Medium**: Grab the actual mean, max, and min temperature.
-
-**Hard**: Grab the weather history graph and write the figure to disk (`download.file()` may be helpful here).
-
-
-## Task 1 (solution)
-
-```{r}
-library(rvest)
-src <- read_html(paste0("http://www.wunderground.com/history/",
-"airport/KVAY/2015/2/17/DailyHistory.html?",
-"req_city=Cherry+Hill&req_state=NJ&",
-"req_statename=New+Jersey&reqdb.zip=08002",
-"&reqdb.magic=1&reqdb.wmo=99999&MR=1"))
-
-# easy solution
-tab1 <- src %>% html_node("#obsTable") %>% html_table()
-# medium solution
-tab2 <- src %>% html_node("#historyTable") %>% html_table() %>%
-  .[2:4, "Actual"]
-# hard solution
-link <- src %>% html_node("#history-graph-image img") %>% html_attr("src")
-download.file(paste0("http://www.wunderground.com", link), 
-              "fig.png", mode = "wb")
-```
-
-What about non-table data?
-
-## Selectorgadget + rvest to the rescue!
+## Selectorgadget
 
 - [Selectorgadget](http://selectorgadget.com/) is a [Chrome browser extension](https://chrome.google.com/webstore/detail/selectorgadget/mhjhnkcfbdhnjickkkdbjoemdmbfginb?hl=en) for quickly extracting desired parts of an HTML page.
 
-- With some user feedback, the gadget find out the [CSS selector](http://www.w3.org/TR/2011/REC-css3-selectors-20110929/) that returns the highlighted page elements.
+* to learn about it, use vignette("selectorgadget")
 
-- Let's try it out on [this page](http://www.sec.gov/litigation/suspensions.shtml)
+* to install it, visit http://selectorgadget.com/
 
-
-## Extracting links to download reports
-
-```{r}
-domain <- "http://www.sec.gov"
-susp <- paste0(domain, "/litigation/suspensions.shtml")
-hrefs <- read_html(susp) %>% html_nodes("tr+ tr a:nth-child(1)") %>% 
-  html_attr(name = "href")
-```
+## Selectorgadget
 
 ```{r, eval = FALSE}
-# download all the pdfs!
-hrefs <- hrefs[!is.na(hrefs)]
-pdfs <- paste0(domain, hrefs)
-mapply(download.file, pdfs, basename(pdfs))
+url <- "http://spiegel.de/schlagzeilen"
+css <- ".schlagzeilen-headline"
+url_parsed <- read_html(url)
+html_nodes(url_parsed, css = css) %>% html_text
 ```
 
 
@@ -242,28 +301,25 @@ mapply(download.file, pdfs, basename(pdfs))
 
     + **urltools**
 
-## Readings
 
-- Basics on HTML, XML, JSON, HTTP, RegEx, XPath
+# APIs
 
-    + Munzert et al. (2014): Automated Data Collection with R. Wiley. http://www.r-datacollection.com/
+## Working with APIs
 
-- curl / libcurl
+* Application programming interfaces (APIs) allow a direct connection to data hosted on a website
+* Most modern APIs use HTTP (HyperText Transfer Protocol) for communication and data transfer between server and client
+* R package httr as a good-to-use HTTP client interface
+* Most web data APIs return data in JSON or XML format
+* R packages jsonlite and xml2 good to process JSON or XML-style data
 
-    + http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
+## Working with APIs
 
-- CSS Selectors
+- If you want to tap an existing API, you have to
 
-    + W3Schools: http://www.w3schools.com/cssref/css_selectors.asp
-
-- Packages: httr, rvest, jsonlite, xml2, curl
-
-    + Readmes, demos and vignettes accompanying the packages
-
-- Packages: RCurl and XML
-
-    + Munzert et al. (2014): Automated Data Collection with R. Wiley. Nolan and Temple-Lang (2013): XML and Web Technologies for Data Science with R. Springer
-
+    + figure out how it works (what requests/actions are possible, what endpoints exist)
+    + (register to use the API)
+    + formulate queries to the API from within R
+    + process the incoming data
 
 ## Twitter
 
@@ -277,14 +333,14 @@ mapply(download.file, pdfs, basename(pdfs))
 
 - documentation at https://dev.twitter.com/overview/documentation
 
+
 ## Accessing the twitter APIs
 
-To access the REST and streaming APIs, you will need to create a twitter application, and generate authentication credentials associated with this application. To do this you will first need to have a twitter account. You will also need to install at least the following R packages: `twitteR`, 
+To access the REST and streaming APIs, you will need to create a twitter application, and generate authentication credentials associated with this application. To do this you will first need to have a twitter account. You will also need to install at least the following R packages: `twitteR`.
 
 
-```{r, eval = FALSE}
-install.packages(c('twitteR', 'streamR', 'RCurl', 'ROAuth', 'httr'))
-```
+
+
 
 ## Create a twitter application
 
@@ -295,6 +351,7 @@ To register a twitter application and get your consumer keys:
 3. Give your app a unique name, a description, any relevant web address, and agree to the terms and conditions. Set the callback URL to http://127.0.0.1:1410.
 4. Go to the keys and access section of the app page, and copy your consumer key and consumer secret to the code below.
 5. (optional): For actions requiring write permissions, generate an access token and access secret.
+
 
 ## Use twitter in R
 
@@ -315,30 +372,37 @@ df <- as.data.frame(t(sapply(results, as.data.frame)))
 Then try these instructions, to use streamR:
 <https://github.com/pablobarbera/streamR#installation-and-authentication>
 
+# Scraping dynamic pages
 
-## Media data from LexisNexis
+## `RSelenium`
+To scrape dynamic web pages (e.g. with Java running in the background) use `RSelenium`
 
-Nexis includes a large selection of international newspapers updated daily. Among them The Daily Telegraph, International New York Times, The Observer, Le Figaro, Le Monde, Corriere della Sera, taz, die tageszeitung, Die ZEIT.
 
-You can access Nexis through the Hertie Library: https://www.hertie-school.org/en/library/resources/#c6741 (scroll down till you find the Nexis link).
+# Group excercises
 
-## Parse data from Nexis into R
+## Breweries in Germany
 
-```{r}
-library(tm)
-library(tm.plugin.lexisnexis)
-library(quanteda)
- 
-ln <- LexisNexisSource("data/lexisnexis.HTML")
-tmCorpus <- VCorpus(ln)
-myCorpus <- corpus(tmCorpus)
-mydfm <- dfm(myCorpus)
-```
+Fetch a list of cities with breweries in Germany:
+http://www.biermap24.de/brauereiliste.php
+
+## Extracting names from a website
+
+Go to the following website: https://www.jstatsoft.org/about/editorialTeam
+
+* Download the url with `download.file(url, destfile = "YOUR PATH")`
+* write a CSS selector that targets all names of the editorial team
+* extract the full lines including the affiliation, and count how many of the editors are at a statistics or mathematics department or institution!
+
+
+## CSS Diner
+
+Repeat playing CSS diner and complete all levels!
+
 
 # Homework Exercises
 
 ## Homework Exercises
-For this week's homework exersises go to Moodle and answer the Quiz posted in the Relational Data section.
+For this week's homework exersises go to Moodle and answer the Quiz posted in the Web Scraping section.
 
 Deadline: Sunday, November 12 before midnight.
 
