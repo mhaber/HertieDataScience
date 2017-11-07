@@ -385,24 +385,30 @@ To scrape dynamic web pages (e.g. with Java running in the background) use `RSel
 Fetch a list of cities with breweries in Germany:
 http://www.biermap24.de/brauereiliste.php
 
-## Extracting names from a website
-
-Go to the following website: https://www.jstatsoft.org/about/editorialTeam
-
-* Download the url with `download.file(url, destfile = "YOUR PATH")`
-* write a CSS selector that targets all names of the editorial team
-* extract the full lines including the affiliation, and count how many of the editors are at a statistics or mathematics department or institution!
-
-
 ## CSS Diner
 
 Repeat playing CSS diner and complete all levels!
+
+# Group excercises solution
+
+## Breweries in Germany
+
+```{r}
+url <- "http://www.biermap24.de/brauereiliste.php"
+content <- read_html(url)
+anchors <- html_nodes(content, ".bgcolor7 > table td+ td a")
+cities <- html_text(anchors)
+cities <- str_trim(cities)
+cities <- cities[!str_detect(cities, "\\(\\d+\\)")]
+length(unique(cities))
+cities <- data.frame(sort(table(cities)))
+```
 
 
 # Homework Exercises
 
 ## Homework Exercises
-For this week's homework exersises go to Moodle and answer the Quiz posted in the Web Scraping section.
+For this week's homework exersises go to Moodle and complete the assignment posted in the Web Scraping section.
 
 Deadline: Sunday, November 12 before midnight.
 
