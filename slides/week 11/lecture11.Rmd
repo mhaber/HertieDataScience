@@ -1,0 +1,116 @@
+---
+title: 'Data Management With R: Interactive Dashboards'
+author: "Matthias Haber"
+date: "20 November 2017"
+output:
+  ioslides_presentation:
+    css: https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css
+  beamer_presentation:
+    colortheme: default
+    df_print: default
+    fig_caption: no
+    fonttheme: default
+    theme: metropolis
+    toc: no
+  slidy_presentation: default
+---
+
+# Prerequisites
+
+## Packages
+
+```{r, message=FALSE, warning=FALSE}
+library(flexdashboard) # install.packages("flexdashboard")
+library(shiny) #install.packages("shiny")
+library(htmlwidgets) #install.packages("htmlwidgets")
+library(plotly) #install.packages("plotly")
+```
+
+# Interactive dashboards
+
+## Why use dashboards?
+
+- R, it provides three core plotting systems:
+
+    + base plots
+    + lattice plots
+    + ggplot2 plots
+
+- writing codes for plotting graphs in R time & again can get tiring
+- difficult to create an interactive visualization for story narration using above packages
+
+## Goal of a dashboard
+
+* Translate complicated data into a more readable, more understandable format for less technical people
+
+* Dashboards allow non-data scientists to see the numbers that are important to them upfront and make connections based on their expertise
+
+* Share your analysis (in an interactive manner) with the community
+
+## `flexdashboard`
+
+Purpose: To create interactive dashboards using rmarkdown.
+
+* Use R Markdown to publish a group of related data visualizations as a dashboard.
+
+* Ideal for publishing interactive JavaScript visualizations based on `htmlwidgets` (also works with standard base, lattice, and grid graphics).
+
+* Flexible and easy to specify row and column-based layouts. Charts are intelligently re-sized to fill the browser and adapted for display on mobile devices.
+
+* Storyboard layouts for presenting sequences of visualizations and related commentary.
+
+## `flexdashboard` examples
+
+Example 1: [Nuclear Waste Sites](https://beta.rstudioconnect.com/jjallaire/htmlwidgets-waste-sites/htmlwidgets-waste-sites.html)
+
+Example 2: [CRAN Downloads](https://jjallaire.shinyapps.io/shiny-crandash/)
+
+
+
+# htmlwidgets
+
+## htmlwidgets
+
+`htmlwidget` allows plots to work seamlessly and consistently in various contexts (e.g., R Markdown documents, shiny apps, inside RStudio, or any other R command prompt) without an internet connection
+
+
+# Plotly
+
+## Basic Plotly object
+
+```{r, warning=FALSE, message=FALSE}
+p <- plot_ly(midwest, x = ~percollege, color = ~state, type = "box")
+p
+```
+
+## Choropleth Maps
+
+```{r, eval = FALSE}
+plot_ly(
+type = 'choropleth',
+locations = c('AZ','CA','VT'),
+locationmode = 'USA-states',
+colorscale = 'Viridis' ,
+z = c(10 ,20 ,40 )) %>% 
+layout(geo = list(scope = 'usa'))
+```
+
+## Choropleth Maps
+
+```{r, echo = FALSE}
+plot_ly(
+type = 'choropleth',
+locations = c('AZ','CA','VT'),
+locationmode = 'USA-states',
+colorscale = 'Viridis' ,
+z = c(10 ,20 ,40 )) %>% 
+layout(geo = list(scope = 'usa'))
+```
+
+# Homework Exercises
+
+## Homework Exercises
+
+
+
+Deadline: Sunday, November 26 before midnight.
