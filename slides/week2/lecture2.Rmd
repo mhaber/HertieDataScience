@@ -39,6 +39,8 @@ install.packages("tidyverse")
 library(tidyverse)
 ```
 
+[Reference: https://www.tidyverse.org/](https://www.tidyverse.org/)
+
 ## Data
 
 Install and load the package `gapminder`
