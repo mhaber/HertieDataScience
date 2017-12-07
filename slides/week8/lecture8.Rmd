@@ -322,6 +322,7 @@ You can easily switch between by specifying `perl = FALSE/TRUE` in `base` R func
 By default, pattern matching is case sensitive in R, but you can turn it off with `ignore.case = TRUE` (base R functions) or wrapping with `ignore.case()` (`stringr` functions). Alternatively, you can use `tolower()` and `toupper()` functions to convert everything to lower or upper case. Take the same example above: 
 
 ```{r ignore.case}
+#something is missing
 pattern <- "a.b"
 grep(pattern, strings, value = TRUE)
 grep(pattern, strings, value = TRUE, ignore.case = TRUE)
