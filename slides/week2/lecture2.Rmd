@@ -43,6 +43,7 @@ library(tidyverse)
 
 Install and load the package `gapminder`
 ```{r, message=FALSE}
+install.packages("gapminder")
 library(gapminder)
 ```
 
