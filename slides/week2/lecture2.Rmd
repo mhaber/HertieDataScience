@@ -169,10 +169,10 @@ knitr::include_graphics("img/ggplot3.png")
 - \alert{data:} Variables mapped to aesthetic attributes
 - \alert{aesthetic}: Visual property of the plot objects
 - \alert{geom:} Geometrical object used to represent data
-- \alert{stats:} Statistical transformations of the data
 - \alert{scales:} Values mapped to aesthetic attributes
-- \alert{coord:} Coordinate system
 - \alert{facets:} Subplots that each display one subset of the data
+- \alert{stats:} Statistical transformations of the data
+- \alert{coord:} Coordinate system
 
 ## Tidy data
 
