@@ -571,7 +571,7 @@ For aggregations it is generally a good idea to include a count `n()`. For examp
 flights %>% 
   filter(!is.na(dep_delay), !is.na(arr_delay)) %>%
   group_by(tailnum) %>% 
-  summarise(delay = mean(arr_delay)) %>% 
+  summarise(delay = mean(arr_delay), n()) %>% 
   arrange(delay)
 ```
 
