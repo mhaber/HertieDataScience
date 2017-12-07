@@ -58,7 +58,8 @@ Prerequisites
 
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
-library(stringr) #install.packages("stringr")
+#install.packages("stringr")
+library(stringr)
 ```
 
 # Strings
