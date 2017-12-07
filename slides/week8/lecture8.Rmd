@@ -370,7 +370,7 @@ mean(str_count(words, "[aeiou]"))
 
 ## Replace matches
 
-str_replace()` and `str_replace_all()` allow you to replace matches with new strings. The simplest use is to replace a pattern with a fixed string:
+`str_replace()` and `str_replace_all()` allow you to replace matches with new strings. The simplest use is to replace a pattern with a fixed string:
 
 ```{r}
 x <- c("apple", "pear", "banana")
