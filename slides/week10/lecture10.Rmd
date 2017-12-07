@@ -25,7 +25,8 @@ bibliography:
 library(tidyverse)
 library(stringr) 
 library(rvest)
-library(knitr) # install.packages("knitr")
+# install.packages("knitr")
+library(knitr)
 ```
 
 # Last week's homework
