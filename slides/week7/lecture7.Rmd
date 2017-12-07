@@ -169,7 +169,7 @@ knitr::include_graphics("img/networkDB.png")
 
 * All programs must be rewritten to accommodate reorganizations of the data
 
-* difficultto look up all orders that involve a specific part
+* difficult to look up all orders that involve a specific part
 
 
 ## Historical example: hierachical databases
