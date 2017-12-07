@@ -49,6 +49,8 @@ install.packages("gapminder")
 library(gapminder)
 ```
 
+[Reference: http://www.gapminder.org/](http://www.gapminder.org/)
+
 # Data visualization in base R
 
 ## Why do we use graphs in data analysis?
